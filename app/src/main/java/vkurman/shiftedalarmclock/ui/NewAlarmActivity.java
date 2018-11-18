@@ -16,12 +16,12 @@
 package vkurman.shiftedalarmclock.ui;
 
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.FrameLayout;
 import android.widget.NumberPicker;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -43,7 +43,6 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.button_save) Button buttonSave;
     @BindView(R.id.button_cancel) Button buttonCancel;
     @BindView(R.id.picker_alarm_type) NumberPicker pickerAlarmType;
-    @BindView(R.id.container_for_fragment) FrameLayout fragmentContainer;
     @BindView(R.id.tv_alarm_name) TextView tvAlarmName;
     @BindView(R.id.tv_tone_and_volume) TextView tvToneName;
     @BindView(R.id.tv_vibrate) TextView tvVibrationName;
@@ -59,6 +58,7 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         ButterKnife.bind(this);
         // Setting OnClickListeners for buttons
         buttonSave.setOnClickListener(this);
+        buttonCancel.setOnClickListener(this);
 
         pickerAlarmType.setMinValue(0);
         pickerAlarmType.setMaxValue(2);
@@ -75,6 +75,11 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         switchTone.setOnCheckedChangeListener(this);
         switchVibrate.setOnCheckedChangeListener(this);
         switchSayTime.setOnCheckedChangeListener(this);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .add(R.id.container_for_fragment, new SingleFragment())
+                .commit();
     }
 
     @Override
@@ -83,8 +88,6 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
             Snackbar.make(buttonSave, "Save clicked", Snackbar.LENGTH_SHORT)
                     .setAction("Save", null).show();
         } else if(view == buttonCancel) {
-            Snackbar.make(buttonCancel, "Cancel clicked", Snackbar.LENGTH_SHORT)
-                    .setAction("Cancel", null).show();
             finish();
         }
     }

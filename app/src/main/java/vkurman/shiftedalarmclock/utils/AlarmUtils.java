@@ -15,7 +15,10 @@
  */
 package vkurman.shiftedalarmclock.utils;
 
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import vkurman.shiftedalarmclock.models.Pattern;
 
@@ -25,6 +28,7 @@ import vkurman.shiftedalarmclock.models.Pattern;
  * Version 1.0
  */
 public class AlarmUtils {
+
     /**
      * Return String representation of alarm time in format "HH:MM".
      *
@@ -32,8 +36,53 @@ public class AlarmUtils {
      * @return String
      */
     public static String formatTime(Calendar cal) {
+        if(cal == null) {
+            return null;
+        }
         return cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE);
     }
+
+    /**
+     * Return String representation of alarm time in format "HH:MM".
+     *
+     * @param hourOfDay - int
+     * @param minute - int
+     * @return String
+     */
+    public static String formatTime(int hourOfDay, int minute) {
+        return String.format(Locale.getDefault(), "%02d", hourOfDay)
+                + ":" + String.format(Locale.getDefault(), "%02d", minute);
+    }
+
+    /**
+     * Return String representation of alarm date in format "dd MMM YYYY".
+     *
+     * @param cal - Calendar
+     * @return String
+     */
+    public static String formatDate(Calendar cal) {
+        if(cal == null) {
+            return null;
+        }
+        return cal.get(Calendar.DAY_OF_MONTH) + " "
+                + new SimpleDateFormat("MMM", Locale.getDefault()).format(cal.getTime()) + " "
+                + cal.get(Calendar.YEAR);
+    }
+
+    /**
+     * Return String representation of alarm date in format "dd MMM YYYY".
+     *
+     * @param year - int
+     * @param month - int
+     * @param day - int
+     * @return String
+     */
+    public static String formatDate(int year, int month, int day) {
+        return String.format(Locale.getDefault(), "%02d", day)
+                + " " + new DateFormatSymbols().getShortMonths()[month]
+                + " " + String.format(Locale.getDefault(), "%04d", year);
+    }
+
     /**
      * Return String representation of alarm pattern.
      *
@@ -41,6 +90,9 @@ public class AlarmUtils {
      * @return String
      */
     public static String formatPattern(Pattern pattern) {
+        if(pattern == null) {
+            return null;
+        }
         StringBuilder sb = new StringBuilder();
         for(boolean on: pattern.getPattern()) {
             sb.append(on ? "[*]" : "[ ]");

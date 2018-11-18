@@ -9,193 +9,212 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.-->
-<android.support.constraint.ConstraintLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.NewAlarmActivity">
+    android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/button_save"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/text_new_alarm_button_save"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/button_cancel" />
-
-    <Button
-        android:id="@+id/button_cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/text_new_alarm_button_cancel"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/button_save"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <NumberPicker
-        android:id="@+id/picker_alarm_type"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/default_padding"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_save">
-    </NumberPicker>
-
-    <FrameLayout
-        android:id="@+id/container_for_fragment"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/default_padding"
-        app:layout_constraintTop_toBottomOf="@id/picker_alarm_type"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-    </FrameLayout>
+        tools:context=".ui.NewAlarmActivity">
 
-    <View
-        android:id="@+id/divider_picker"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height"
-        android:background="@color/colorPrimary"
-        android:padding="@dimen/default_padding"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/container_for_fragment" />
+        <Button
+            android:id="@+id/button_save"
+            android:layout_width="0dp"
+            app:layout_constraintHorizontal_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/text_new_alarm_button_save"
+            android:background="?android:attr/selectableItemBackground"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/button_cancel" />
 
-    <TextView
-        android:id="@+id/tv_alarm_name_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/default_padding"
-        android:text="@string/text_new_alarm_name"
-        android:textSize="@dimen/text_size_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider_picker" />
+        <Button
+            android:id="@+id/button_cancel"
+            android:layout_width="0dp"
+            app:layout_constraintHorizontal_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/text_new_alarm_button_cancel"
+            android:background="?android:attr/selectableItemBackground"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/button_save"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_alarm_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/default_no_padding"
-        android:paddingBottom="@dimen/default_padding"
-        android:paddingStart="@dimen/default_padding_subtext_start"
-        android:paddingEnd="@dimen/default_padding_subtext_start"
-        android:textSize="@dimen/text_size_normal"
-        app:layout_constraintStart_toStartOf="@id/tv_alarm_name_title"
-        app:layout_constraintTop_toBottomOf="@id/tv_alarm_name_title"
-        tools:text="@string/tools_text_name"/>
+        <NumberPicker
+            android:id="@+id/picker_alarm_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/button_save">
+        </NumberPicker>
 
-    <View
-        android:id="@+id/divider_alarm_name"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height"
-        android:background="@color/colorPrimary"
-        android:padding="@dimen/default_padding"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_alarm_name" />
+        <View
+            android:id="@+id/divider_picker"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_size"
+            android:background="@color/colorPrimary"
+            android:padding="@dimen/default_padding"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/picker_alarm_type" />
 
-    <TextView
-        android:id="@+id/tv_tone_and_volume_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/default_padding"
-        android:text="@string/text_new_alarm_tone_volume"
-        android:textSize="@dimen/text_size_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider_alarm_name" />
+        <FrameLayout
+            android:id="@+id/container_for_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            app:layout_constraintTop_toBottomOf="@id/picker_alarm_type"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+        </FrameLayout>
 
-    <TextView
-        android:id="@+id/tv_tone_and_volume"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/default_no_padding"
-        android:paddingBottom="@dimen/default_padding"
-        android:paddingStart="@dimen/default_padding_subtext_start"
-        android:paddingEnd="@dimen/default_padding_subtext_start"
-        android:textSize="@dimen/text_size_normal"
-        app:layout_constraintStart_toStartOf="@id/tv_tone_and_volume_title"
-        app:layout_constraintTop_toBottomOf="@id/tv_tone_and_volume_title"
-        tools:text="@string/tools_text_tone_name"/>
+        <View
+            android:id="@+id/divider_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_size"
+            android:background="@color/colorPrimary"
+            android:padding="@dimen/default_padding"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/container_for_fragment" />
 
-    <Switch
-        android:id="@+id/switch_tone_and_volume"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/default_padding"
-        app:layout_constraintTop_toBottomOf="@id/divider_alarm_name"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <TextView
+            android:id="@+id/tv_alarm_name_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            android:text="@string/text_new_alarm_name"
+            android:textSize="@dimen/text_size_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider_fragment" />
 
-    <View
-        android:id="@+id/divider_tone_volume"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height"
-        android:background="@color/colorPrimary"
-        android:padding="@dimen/default_padding"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_tone_and_volume" />
+        <TextView
+            android:id="@+id/tv_alarm_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/default_no_padding"
+            android:paddingBottom="@dimen/default_padding"
+            android:paddingStart="@dimen/default_padding_subtext_start"
+            android:paddingEnd="@dimen/default_padding_subtext_start"
+            android:textSize="@dimen/text_size_normal"
+            app:layout_constraintStart_toStartOf="@id/tv_alarm_name_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_alarm_name_title"
+            tools:text="@string/tools_text_name"/>
 
-    <TextView
-        android:id="@+id/tv_vibrate_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/default_padding"
-        android:text="@string/text_new_alarm_vibrate"
-        android:textSize="@dimen/text_size_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider_tone_volume" />
+        <View
+            android:id="@+id/divider_alarm_name"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_size"
+            android:background="@color/colorPrimary"
+            android:padding="@dimen/default_padding"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_alarm_name" />
 
-    <TextView
-        android:id="@+id/tv_vibrate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/default_no_padding"
-        android:paddingBottom="@dimen/default_padding"
-        android:paddingStart="@dimen/default_padding_subtext_start"
-        android:paddingEnd="@dimen/default_padding_subtext_start"
-        android:textSize="@dimen/text_size_normal"
-        app:layout_constraintStart_toStartOf="@id/tv_vibrate_title"
-        app:layout_constraintTop_toBottomOf="@id/tv_vibrate_title"
-        tools:text="@string/tools_text_vibration_name"/>
+        <TextView
+            android:id="@+id/tv_tone_and_volume_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            android:text="@string/text_new_alarm_tone_volume"
+            android:textSize="@dimen/text_size_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider_alarm_name" />
 
-    <Switch
-        android:id="@+id/switch_vibrate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/default_padding"
-        app:layout_constraintTop_toBottomOf="@id/divider_tone_volume"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <TextView
+            android:id="@+id/tv_tone_and_volume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/default_no_padding"
+            android:paddingBottom="@dimen/default_padding"
+            android:paddingStart="@dimen/default_padding_subtext_start"
+            android:paddingEnd="@dimen/default_padding_subtext_start"
+            android:textSize="@dimen/text_size_normal"
+            app:layout_constraintStart_toStartOf="@id/tv_tone_and_volume_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_tone_and_volume_title"
+            tools:text="@string/tools_text_tone_name"/>
 
-    <View
-        android:id="@+id/divider_vibrate"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height"
-        android:background="@color/colorPrimary"
-        android:padding="@dimen/default_padding"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_vibrate" />
+        <Switch
+            android:id="@+id/switch_tone_and_volume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            app:layout_constraintTop_toBottomOf="@id/divider_alarm_name"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_say_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/default_padding"
-        android:text="@string/text_new_alarm_say_time"
-        android:textSize="@dimen/text_size_title"
-        app:layout_constraintTop_toBottomOf="@id/divider_vibrate"
-        app:layout_constraintStart_toStartOf="parent" />
+        <View
+            android:id="@+id/divider_tone_volume"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_size"
+            android:background="@color/colorPrimary"
+            android:padding="@dimen/default_padding"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_tone_and_volume" />
 
-    <Switch
-        android:id="@+id/switch_say_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/default_padding"
-        app:layout_constraintTop_toBottomOf="@id/divider_vibrate"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <TextView
+            android:id="@+id/tv_vibrate_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            android:text="@string/text_new_alarm_vibrate"
+            android:textSize="@dimen/text_size_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider_tone_volume" />
 
-</android.support.constraint.ConstraintLayout>
+        <TextView
+            android:id="@+id/tv_vibrate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/default_no_padding"
+            android:paddingBottom="@dimen/default_padding"
+            android:paddingStart="@dimen/default_padding_subtext_start"
+            android:paddingEnd="@dimen/default_padding_subtext_start"
+            android:textSize="@dimen/text_size_normal"
+            app:layout_constraintStart_toStartOf="@id/tv_vibrate_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_vibrate_title"
+            tools:text="@string/tools_text_vibration_name"/>
+
+        <Switch
+            android:id="@+id/switch_vibrate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            app:layout_constraintTop_toBottomOf="@id/divider_tone_volume"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <View
+            android:id="@+id/divider_vibrate"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_size"
+            android:background="@color/colorPrimary"
+            android:padding="@dimen/default_padding"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_vibrate" />
+
+        <TextView
+            android:id="@+id/tv_say_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            android:text="@string/text_new_alarm_say_time"
+            android:textSize="@dimen/text_size_title"
+            app:layout_constraintTop_toBottomOf="@id/divider_vibrate"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Switch
+            android:id="@+id/switch_say_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            app:layout_constraintTop_toBottomOf="@id/divider_vibrate"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
+</ScrollView>
