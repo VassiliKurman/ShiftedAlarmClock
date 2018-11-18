@@ -13,22 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package vkurman.shiftedalarmclock;
-
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+package vkurman.shiftedalarmclock.interfaces;
 
 /**
- * MainActivity is displaying list of created alarms.
- *
- * Created by Vassili Kurman on 17/11/2018.
+ * ResultListener
+ * Created by Vassili Kurman on 18/11/2018.
  * Version 1.0
  */
-public class MainActivity extends AppCompatActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-    }
+public interface ResultListener {
+    void onResultClick(long id);
 }

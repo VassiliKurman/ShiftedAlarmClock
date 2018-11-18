@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--Copyright (C) 2018 The Android Open Source Project
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -9,10 +10,11 @@
  See the License for the specific language governing permissions and
  limitations under the License.-->
 <resources>
-    <string name="app_name">Shifted Alarm Clock</string>
+    <!-- RecyclerView -->
+    <dimen name="default_padding">8dp</dimen>
 
-    <!-- Tools text -->
-    <string name="tools_text_time">00:00</string>
-    <string name="tools_text_name">Alarm Name</string>
-    <string name="tools_text_pattern">Pattern</string>
+    <dimen name="text_size_max">48sp</dimen>
+    <dimen name="text_size_title">22sp</dimen>
+    <dimen name="text_size_subtitle">18sp</dimen>
+    <dimen name="text_size_normal">14sp</dimen>
 </resources>
