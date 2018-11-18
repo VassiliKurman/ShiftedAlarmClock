@@ -11,8 +11,18 @@
 <resources>
     <string name="app_name">Shifted Alarm Clock</string>
 
+    <!-- New Alarm Activity -->
+    <string name="text_new_alarm_button_save">Save</string>
+    <string name="text_new_alarm_button_cancel">Cancel</string>
+    <string name="text_new_alarm_name">Alarm Name</string>
+    <string name="text_new_alarm_tone_volume">Alarm Tone and Volume</string>
+    <string name="text_new_alarm_vibrate">Vibrate</string>
+    <string name="text_new_alarm_say_time">Say Time</string>
+
     <!-- Tools text -->
     <string name="tools_text_time">00:00</string>
-    <string name="tools_text_name">Alarm Name</string>
+    <string name="tools_text_name">Alarm name</string>
     <string name="tools_text_pattern">Pattern</string>
+    <string name="tools_text_tone_name">Tone name</string>
+    <string name="tools_text_vibration_name">Vibration name</string>
 </resources>
