@@ -18,6 +18,8 @@
     <string name="text_new_alarm_tone_volume">Alarm Tone and Volume</string>
     <string name="text_new_alarm_vibrate">Vibrate</string>
     <string name="text_new_alarm_say_time">Say Time</string>
+    <string name="text_new_alarm_weekday">Weekday</string>
+    <string name="text_new_alarm_time">Time</string>
 
     <!-- Tools text -->
     <string name="tools_text_date">01 Jan 1970</string>
@@ -26,5 +28,8 @@
     <string name="tools_text_pattern">Pattern</string>
     <string name="tools_text_tone_name">Tone name</string>
     <string name="tools_text_vibration_name">Vibration name</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

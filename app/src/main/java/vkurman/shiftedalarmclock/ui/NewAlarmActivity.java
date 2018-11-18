@@ -40,6 +40,7 @@ import vkurman.shiftedalarmclock.models.Type;
 public class NewAlarmActivity extends AppCompatActivity implements View.OnClickListener,
         CompoundButton.OnCheckedChangeListener {
 
+    // Views
     @BindView(R.id.button_save) Button buttonSave;
     @BindView(R.id.button_cancel) Button buttonCancel;
     @BindView(R.id.picker_alarm_type) NumberPicker pickerAlarmType;
@@ -49,6 +50,8 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.switch_tone_and_volume) Switch switchTone;
     @BindView(R.id.switch_vibrate) Switch switchVibrate;
     @BindView(R.id.switch_say_time) Switch switchSayTime;
+    // FragmentManager
+    private FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +59,8 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_new_alarm);
         // Binding views
         ButterKnife.bind(this);
+        // Getting ref to FragmentManager
+        fragmentManager = getSupportFragmentManager();
         // Setting OnClickListeners for buttons
         buttonSave.setOnClickListener(this);
         buttonCancel.setOnClickListener(this);
@@ -68,6 +73,20 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
             public void onValueChange(NumberPicker pickerAlarmType, int oldVal, int newVal) {
                 Snackbar.make(pickerAlarmType, Type.values()[newVal].toString(), Snackbar.LENGTH_SHORT)
                         .setAction("Action", null).show();
+                switch (newVal) {
+                    case 0:
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.container_for_fragment, new SingleFragment())
+                                .commit();
+                        break;
+                    case 1:
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.container_for_fragment, new WeekFragment())
+                                .commit();
+                        break;
+                    case 2:
+                        break;
+                }
             }
         });
 
@@ -76,7 +95,6 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         switchVibrate.setOnCheckedChangeListener(this);
         switchSayTime.setOnCheckedChangeListener(this);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .add(R.id.container_for_fragment, new SingleFragment())
                 .commit();
