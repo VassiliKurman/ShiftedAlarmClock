@@ -17,7 +17,6 @@ package vkurman.shiftedalarmclock.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,11 +61,13 @@ public class AlarmsAdapter extends RecyclerView.Adapter<AlarmsAdapter.AlarmsView
             mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if(isChecked) {
-                        Snackbar.make(itemView, "Switched ON", Snackbar.LENGTH_SHORT)
-                                .setAction("Action", null).show();
+                        mAlarms.get(getAdapterPosition()).setActive(true);
+                        // TODO update database
+                        // TODO turn ON alarm
                     } else {
-                        Snackbar.make(itemView, "Switched OFF", Snackbar.LENGTH_SHORT)
-                                .setAction("Action", null).show();
+                        mAlarms.get(getAdapterPosition()).setActive(false);
+                        // TODO update database
+                        // TODO turn OFF alarm
                     }
                 }
             });
@@ -81,8 +82,7 @@ public class AlarmsAdapter extends RecyclerView.Adapter<AlarmsAdapter.AlarmsView
             }
             int position = getAdapterPosition();
             if(position >= 0 && position < mAlarms.size()) {
-                Alarm alarm = mAlarms.get(position);
-                mResultListener.onResultClick(alarm.getId());
+                mResultListener.onResultClick(mAlarms.get(position).getId());
             }
         }
     }
@@ -131,5 +131,14 @@ public class AlarmsAdapter extends RecyclerView.Adapter<AlarmsAdapter.AlarmsView
     public void updateData(List<Alarm> alarms) {
         mAlarms = alarms;
         notifyDataSetChanged();
+    }
+
+    /**
+     * Returns list of items attached to this adapter.
+     *
+     * @return List
+     */
+    public List<Alarm> getAlarms() {
+        return mAlarms;
     }
 }

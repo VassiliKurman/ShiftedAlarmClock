@@ -104,8 +104,8 @@ public class Alarm {
      */
     @Ignore
     public Alarm() {
-
-        this.vibration = new Vibration();
+        this(-1, null, true, false, null, 100, false, false,
+                new Pattern(), new Snooze(), new Vibration());
     }
 
     /**

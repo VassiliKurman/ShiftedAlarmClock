@@ -44,7 +44,7 @@ public class Vibration {
 
     @Ignore
     public Vibration() {
-        this(null, PATTERN_SIMPLE, false);
+        this("Default", PATTERN_SIMPLE, false);
     }
 
     public Vibration(String vibrationName, long[] vibrationPattern, boolean vibrationEnabled) {

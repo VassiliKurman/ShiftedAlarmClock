@@ -15,29 +15,30 @@
  */
 package vkurman.shiftedalarmclock.aac;
 
+import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModel;
+import android.support.annotation.NonNull;
 
-import javax.inject.Inject;
+import java.util.List;
 
 import vkurman.shiftedalarmclock.models.Alarm;
 
 /**
- * AlarmViewModel
- * Created by Vassili Kurman on 24/11/2018.
+ * AlarmsViewModel
+ * Created by Vassili Kurman on 25/11/2018.
  * Version 1.0
  */
-public class AlarmViewModel extends ViewModel {
+public class AlarmsViewModel extends AndroidViewModel {
 
-    private LiveData<Alarm> alarm;
+    private LiveData<List<Alarm>> alarms;
 
-    // Instructing Dagger 2 to provide the Repository parameter
-    @Inject
-    AlarmViewModel(AlarmDatabase database, int alarmId) {
-        alarm = database.alarmDao().load(alarmId);
+    public AlarmsViewModel(@NonNull Application application) {
+        super(application);
+        alarms = AlarmDatabase.getInstance(getApplication()).alarmDao().loadAll();
     }
 
-    public LiveData<Alarm> getAlarm() {
-        return this.alarm;
+    public LiveData<List<Alarm>> getAlarms() {
+        return alarms;
     }
 }

@@ -15,10 +15,16 @@
  */
 package vkurman.shiftedalarmclock.ui;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
+import android.media.RingtoneManager;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -29,7 +35,15 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import vkurman.shiftedalarmclock.R;
+import vkurman.shiftedalarmclock.aac.AlarmDatabase;
+import vkurman.shiftedalarmclock.aac.AlarmViewModel;
+import vkurman.shiftedalarmclock.aac.AlarmViewModelFactory;
+import vkurman.shiftedalarmclock.aac.AppExecutors;
+import vkurman.shiftedalarmclock.models.Alarm;
+import vkurman.shiftedalarmclock.models.Pattern;
+import vkurman.shiftedalarmclock.models.Snooze;
 import vkurman.shiftedalarmclock.models.Type;
+import vkurman.shiftedalarmclock.models.Vibration;
 
 /**
  * NewAlarmActivity is activity to create new Alarm.
@@ -39,6 +53,11 @@ import vkurman.shiftedalarmclock.models.Type;
  */
 public class NewAlarmActivity extends AppCompatActivity implements View.OnClickListener,
         CompoundButton.OnCheckedChangeListener {
+
+    public static final String EXTRA_ALARM_ID = "alarmId";
+    public static final int DEFAULT_ALARM_ID = -1;
+
+    private static final String TAG = NewAlarmActivity.class.getSimpleName();
 
     // Views
     @BindView(R.id.button_save) Button buttonSave;
@@ -52,22 +71,142 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.switch_say_time) Switch switchSayTime;
     // FragmentManager
     private FragmentManager fragmentManager;
+    // Database reference
+    private AlarmDatabase mDb;
+    // Alarm id
+    private int mAlarmId;
+    // Alarm
+    private Alarm mAlarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_alarm);
+        // Setting alarm id to default
+        mAlarmId = DEFAULT_ALARM_ID;
+        // Getting ref to database
+        mDb = AlarmDatabase.getInstance(getApplicationContext());
         // Binding views
         ButterKnife.bind(this);
         // Getting ref to FragmentManager
         fragmentManager = getSupportFragmentManager();
-        // Setting OnClickListeners for buttons
-        buttonSave.setOnClickListener(this);
-        buttonCancel.setOnClickListener(this);
+
+        if(savedInstanceState != null && savedInstanceState.containsKey(EXTRA_ALARM_ID)) {
+            Log.e(TAG, "Retrieving data from savedInstanceState!");
+            mAlarmId = savedInstanceState.getInt(EXTRA_ALARM_ID, DEFAULT_ALARM_ID);
+        }
+
+        Intent intent = getIntent();
+        if(intent != null && intent.hasExtra(EXTRA_ALARM_ID)) {
+            buttonSave.setText(R.string.text_new_alarm_button_update);
+            if(mAlarmId == DEFAULT_ALARM_ID) {
+                mAlarmId = intent.getIntExtra(EXTRA_ALARM_ID, DEFAULT_ALARM_ID);
+
+                AlarmViewModelFactory factory = new AlarmViewModelFactory(mDb, mAlarmId);
+                final AlarmViewModel viewModel = ViewModelProviders.of(this, factory).get(AlarmViewModel.class);
+                viewModel.getAlarm().observe(this, new Observer<Alarm>() {
+                    @Override
+                    public void onChanged(@Nullable Alarm alarm) {
+                        viewModel.getAlarm().removeObserver(this);
+                        Log.d(TAG, "Receiving database update from LiveData");
+                        mAlarm = alarm;
+                        populateUI(mAlarm);
+                    }
+                });
+            }
+        } else {
+            Log.e(TAG, "No data set!");
+            if(mAlarm == null) {
+                Log.e(TAG, "Creating new alarm!");
+                mAlarm = createAlarm();
+            }
+            populateUI(mAlarm);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(EXTRA_ALARM_ID, mAlarmId);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onClick(View view) {
+        if(view == buttonSave) {
+            onSaveButtonClicked();
+        } else if(view == buttonCancel) {
+            finish();
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if(buttonView == switchTone) {
+            Snackbar.make(buttonSave, "Tone switched " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
+                    .setAction("Tone", null).show();
+        } else if(buttonView == switchVibrate) {
+            Snackbar.make(buttonSave, "Vibrate switched " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
+                    .setAction("Vibrate", null).show();
+        } else if(buttonView == switchSayTime) {
+            Snackbar.make(buttonSave, "Say Time switched " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
+                    .setAction("Say", null).show();
+        }
+    }
+
+    /**
+     * Setting UI.
+     *
+     * @param alarm - Alarm
+     */
+    private void populateUI(Alarm alarm) {
+        if(alarm == null) {
+            return;
+        }
+
+        if(alarm.getPattern() == null || alarm.getPattern().getPattern().length == 1) {
+            fragmentManager.beginTransaction()
+                    .add(R.id.container_for_fragment, new SingleFragment())
+                    .commit();
+        } else if(alarm.getPattern().getPattern().length == 7) {
+            Pattern pat = alarm.getPattern();
+            WeekFragment fragment = new WeekFragment();
+            // Adding fragment to activity
+            fragmentManager.beginTransaction()
+                    .add(R.id.container_for_fragment, fragment)
+                    .commit();
+            // Setting checkboxes
+//            fragment.checkboxMonday.setChecked(pat.getPatternValue(0));
+//            fragment.checkboxTuesday.setChecked(pat.getPatternValue(1));
+//            fragment.checkboxWednesday.setChecked(pat.getPatternValue(2));
+//            fragment.checkboxThursday.setChecked(pat.getPatternValue(3));
+//            fragment.checkboxFriday.setChecked(pat.getPatternValue(4));
+//            fragment.checkboxSaturday.setChecked(pat.getPatternValue(5));
+//            fragment.checkboxSunday.setChecked(pat.getPatternValue(6));
+        } else {
+            // TODO add custom fragment
+        }
+
+        tvAlarmName.setText(alarm.getName());
 
         pickerAlarmType.setMinValue(0);
         pickerAlarmType.setMaxValue(2);
         pickerAlarmType.setDisplayedValues(Type.asStringArray());
+        // Setting alarm tone
+        if(alarm.getTone() != null) {
+            tvToneName.setText(alarm.getTone());
+        }
+        // TODO set volume
+        // TODO set switch for graduate volume increase
+        // Setting vibration
+        if(alarm.getVibration() != null) {
+            tvVibrationName.setText(alarm.getVibration().getVibrationName());
+            switchVibrate.setChecked(alarm.getVibration().isVibrationEnabled());
+        } else {
+            switchVibrate.setChecked(false);
+        }
+        switchSayTime.setChecked(alarm.isSayTime());
+
+        // Setting listeners
         pickerAlarmType.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker pickerAlarmType, int oldVal, int newVal) {
@@ -89,38 +228,48 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         });
-
+        // Setting OnClickListeners for buttons
+        buttonSave.setOnClickListener(this);
+        buttonCancel.setOnClickListener(this);
         // Setting OnCheckedChangeListeners
         switchTone.setOnCheckedChangeListener(this);
         switchVibrate.setOnCheckedChangeListener(this);
         switchSayTime.setOnCheckedChangeListener(this);
-
-        fragmentManager.beginTransaction()
-                .add(R.id.container_for_fragment, new SingleFragment())
-                .commit();
     }
 
-    @Override
-    public void onClick(View view) {
-        if(view == buttonSave) {
-            Snackbar.make(buttonSave, "Save clicked", Snackbar.LENGTH_SHORT)
-                    .setAction("Save", null).show();
-        } else if(view == buttonCancel) {
-            finish();
-        }
+    /**
+     * Creating new Alarm object.
+     *
+     * @return Alarm
+     */
+    private Alarm createAlarm() {
+        String tone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();
+        int volume = 100;
+        Pattern pattern = new Pattern();
+        Snooze snooze = new Snooze();
+        Vibration vibration = new Vibration();
+
+        return new Alarm(DEFAULT_ALARM_ID, null, true, false, tone, volume,
+                false, false, pattern, snooze, vibration);
     }
 
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(buttonView == switchTone) {
-            Snackbar.make(buttonSave, "Tone switched " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
-                    .setAction("Tone", null).show();
-        } else if(buttonView == switchVibrate) {
-            Snackbar.make(buttonSave, "Vibrate switched " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
-                    .setAction("Vibrate", null).show();
-        } else if(buttonView == switchSayTime) {
-            Snackbar.make(buttonSave, "Say Time switched " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
-                    .setAction("Say", null).show();
+    private void onSaveButtonClicked() {
+        if(mAlarm == null) {
+            return;
         }
+        // Saving alarm to database using Executor
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                if(mAlarmId == DEFAULT_ALARM_ID) {
+                    // Save alarm
+                    mDb.alarmDao().save(mAlarm);
+                } else {
+                    // Update alarm
+                    mDb.alarmDao().update(mAlarm);
+                }
+                finish();
+            }
+        });
     }
 }

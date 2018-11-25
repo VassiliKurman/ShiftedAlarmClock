@@ -16,6 +16,7 @@
 package vkurman.shiftedalarmclock.models;
 
 import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Ignore;
 
 /**
  * Snooze
@@ -41,10 +42,15 @@ public class Snooze {
     @ColumnInfo(name = "snooze_repeat")
     private int snoozeRepeat;
 
+    @Ignore
     public Snooze() {
-        this.snoozeEnabled = false;
-        this.snoozeInterval = INTERVALS[0];
-        this.snoozeRepeat = REPEATS[0];
+        this(false, INTERVALS[0], REPEATS[0]);
+    }
+
+    public Snooze(boolean snoozeEnabled, int snoozeInterval, int snoozeRepeat) {
+        this.snoozeEnabled = snoozeEnabled;
+        this.snoozeInterval = snoozeInterval;
+        this.snoozeRepeat = snoozeRepeat;
     }
 
     public boolean isSnoozeEnabled() {

@@ -36,10 +36,10 @@ import vkurman.shiftedalarmclock.models.Alarm;
 public interface AlarmDao {
 
     @Query("SELECT * FROM alarm WHERE id = :alarmId")
-    Alarm load(int alarmId);
+    LiveData<Alarm> load(int alarmId);
 
     @Query("SELECT * FROM alarm")
-    List<Alarm> loadAll();
+    LiveData<List<Alarm>> loadAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void save(Alarm... alarms);
