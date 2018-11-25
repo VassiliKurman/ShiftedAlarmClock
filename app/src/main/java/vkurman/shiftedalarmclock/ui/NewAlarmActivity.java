@@ -21,9 +21,11 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,6 +33,9 @@ import android.widget.CompoundButton;
 import android.widget.NumberPicker;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -52,7 +57,7 @@ import vkurman.shiftedalarmclock.models.Vibration;
  * Version 1.0
  */
 public class NewAlarmActivity extends AppCompatActivity implements View.OnClickListener,
-        CompoundButton.OnCheckedChangeListener {
+        CompoundButton.OnCheckedChangeListener, NameDialogFragment.NameDialogListener {
 
     public static final String EXTRA_ALARM_ID = "alarmId";
     public static final int DEFAULT_ALARM_ID = -1;
@@ -115,7 +120,7 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
                 });
             }
         } else {
-            Log.e(TAG, "No data set!");
+            Log.e(TAG, "No intent or no data set in intent!");
             if(mAlarm == null) {
                 Log.e(TAG, "Creating new alarm!");
                 mAlarm = createAlarm();
@@ -144,12 +149,18 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         if(buttonView == switchTone) {
             Snackbar.make(buttonSave, "Tone switched " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
                     .setAction("Tone", null).show();
+
+            mAlarm.setGraduallyIncreaseVolume(isChecked);
         } else if(buttonView == switchVibrate) {
             Snackbar.make(buttonSave, "Vibrate switched " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
                     .setAction("Vibrate", null).show();
+
+            mAlarm.getVibration().setVibrationEnabled(isChecked);
         } else if(buttonView == switchSayTime) {
             Snackbar.make(buttonSave, "Say Time switched " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
                     .setAction("Say", null).show();
+
+            mAlarm.setSayTime(isChecked);
         }
     }
 
@@ -207,6 +218,13 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         switchSayTime.setChecked(alarm.isSayTime());
 
         // Setting listeners
+        tvAlarmName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onNameRequest();
+            }
+        });
+
         pickerAlarmType.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker pickerAlarmType, int oldVal, int newVal) {
@@ -249,7 +267,7 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         Snooze snooze = new Snooze();
         Vibration vibration = new Vibration();
 
-        return new Alarm(DEFAULT_ALARM_ID, null, true, false, tone, volume,
+        return new Alarm(DEFAULT_ALARM_ID, "Alarm", true, false, tone, volume,
                 false, false, pattern, snooze, vibration);
     }
 
@@ -262,6 +280,8 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void run() {
                 if(mAlarmId == DEFAULT_ALARM_ID) {
+                    mAlarmId = Math.abs(new Random(Integer.MAX_VALUE).nextInt());
+                    mAlarm.setId(mAlarmId);
                     // Save alarm
                     mDb.alarmDao().save(mAlarm);
                 } else {
@@ -271,5 +291,28 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
                 finish();
             }
         });
+    }
+
+    /**
+     * Method to show text input dialog for name.
+     */
+    public void onNameRequest() {
+        // Create an instance of the dialog fragment and show it
+        NameDialogFragment dialog = new NameDialogFragment();
+        dialog.show(getSupportFragmentManager(), TAG);
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog){
+        if(dialog instanceof NameDialogFragment) {
+            NameDialogFragment d = (NameDialogFragment) dialog;
+            String name = d.getName();
+            if(!TextUtils.isEmpty(name)) {
+                mAlarm.setName(name);
+                tvAlarmName.setText(name);
+            } else {
+                Toast.makeText(this, R.string.text_name_not_specified, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
