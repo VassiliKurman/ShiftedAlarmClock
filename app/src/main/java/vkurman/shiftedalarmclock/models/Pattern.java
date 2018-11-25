@@ -15,9 +15,12 @@
  */
 package vkurman.shiftedalarmclock.models;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Ignore;
 import android.support.annotation.NonNull;
 
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Pattern - pattern fo {@link Alarm}
@@ -28,18 +31,21 @@ public class Pattern {
     /**
      * Pattern start date
      */
-    private Calendar patternStart;
+    @ColumnInfo(name = "start_date")
+    private Date startDate;
     /**
      * Pattern description
      */
+    @ColumnInfo(name = "pattern")
     private boolean[] pattern;
 
     /**
      * For no argument constructor 7 day pattern will be used from
      * Monday to Sunday.
      */
+    @Ignore
     public Pattern() {
-        pattern = new boolean[7];
+        this(null, new boolean[7]);
     }
 
     /**
@@ -47,32 +53,29 @@ public class Pattern {
      *
      * @param pattern - boolean[]
      */
-    public Pattern(boolean[] pattern) {
+    public Pattern(Date startDate, boolean[] pattern) {
+        this.startDate = startDate == null ? Calendar.getInstance().getTime() : startDate;
         this.pattern = pattern;
     }
 
     /**
      * Sets pattern start date. If argument is null, than start date is now.
      *
-     * @param date - Calendar
+     * @param date - Date
      * @return Pattern
      */
-    public Pattern setPatternStart(Calendar date) {
-        if (date == null)
-            patternStart = Calendar.getInstance();
-        else
-            this.patternStart = date;
-
+    public Pattern setStartDate(Date date) {
+        startDate = date == null ? Calendar.getInstance().getTime() : date;
         return this;
     }
 
     /**
      * Returns pattern start date and time
      *
-     * @return Calendar
+     * @return Date
      */
-    public Calendar getPatternStart() {
-        return patternStart;
+    public Date getStartDate() {
+        return startDate;
     }
 
     /**
@@ -92,7 +95,6 @@ public class Pattern {
      */
     public Pattern setPattern(@NonNull boolean[] pattern) {
         this.pattern = pattern;
-
         return this;
     }
 
@@ -106,9 +108,7 @@ public class Pattern {
     public Pattern setPatternValue(int index, boolean on) {
         if(index < 0 || index >= pattern.length)
             throw new IllegalArgumentException("Index is not valid!");
-
         this.pattern[index] = on;
-
         return this;
     }
 
@@ -121,7 +121,6 @@ public class Pattern {
     public boolean getPatternValue(int index) {
         if(index < 0 || index >= pattern.length)
             throw new IllegalArgumentException("Wrong index provided");
-
         return pattern[index];
     }
 }

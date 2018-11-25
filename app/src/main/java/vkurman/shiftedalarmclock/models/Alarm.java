@@ -15,68 +15,134 @@
  */
 package vkurman.shiftedalarmclock.models;
 
-import java.util.Calendar;
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 
 /**
  * Alarm
  * Created by Vassili Kurman on 18/11/2018.
  * Version 1.0
  */
+@Entity
 public class Alarm {
+
+    /**
+     * Minimum value for volume
+     */
+    private static final int MIN_VOLUME = 100;
+    /**
+     * Maximum value for volume
+     */
+    private static final int MAX_VOLUME = 100;
+
     /**
      * Alarm id
      */
-    private Long id;
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
     /**
      * Name for alarm
      */
+    @ColumnInfo(name = "name")
     private String name;
-    /**
-     * Alarm pattern
-     */
-    private Pattern pattern;
-    /**
-     * Alarm date and time
-     */
-    private Calendar date;
+
     /**
      * Indicator that alarm is activated
      */
+    @ColumnInfo(name = "active")
     private boolean active;
     /**
-     * indicator if alarm is repeatable
+     * Indicator if alarm is repeatable
      */
+    @ColumnInfo(name = "repeat")
     private boolean repeat;
-    /**
-     * Indicator if snooze option to use in alarm
-     */
-    private boolean snooze;
-    /**
-     * Minutes to snooze alarm
-     */
-    private int snoozeMinutes;
-    /**
-     * How many time alarm to snooze
-     */
-    private int snoozeTimes;
     /**
      * Alarm tone
      */
+    @ColumnInfo(name = "tone")
     private String tone;
+    /**
+     * Volume of alarm
+     */
+    @ColumnInfo(name = "volume")
+    private int volume;
     /**
      * Flag to gradually increase the volume
      */
+    @ColumnInfo(name = "gradually_increase")
     private boolean graduallyIncreaseVolume;
+
+    /**
+     * Say time loud
+     */
+    @ColumnInfo(name = "say_time")
+    private boolean sayTime;
+
+    /**
+     * Alarm pattern
+     */
+    @Embedded
+    private Pattern pattern;
+
+    /**
+     * Indicator if snooze option to use in alarm
+     */
+    @Embedded
+    private Snooze snooze;
     /**
      * Flag to use vibration
      */
-    private boolean vibration;
+    @Embedded
+    private Vibration vibration;
+
+    /**
+     * Default constructor.
+     */
+    @Ignore
+    public Alarm() {
+
+        this.vibration = new Vibration();
+    }
+
+    /**
+     * Constructor for Room.
+     * @param id - int
+     * @param name - String
+     * @param active - boolean
+     * @param repeat - boolean
+     * @param tone - String
+     * @param volume - int
+     * @param graduallyIncreaseVolume - boolean
+     * @param sayTime - boolean
+     * @param pattern - Pattern
+     * @param snooze - Snooze
+     * @param vibration - Vibration
+     */
+    public Alarm(int id, String name, boolean active, boolean repeat, String tone, int volume,
+                 boolean graduallyIncreaseVolume, boolean sayTime, Pattern pattern,
+                 Snooze snooze, Vibration vibration) {
+        this.id = id;
+        this.name = name;
+        this.active = active;
+        this.repeat = repeat;
+        this.tone = tone;
+        this.volume = volume;
+        this.graduallyIncreaseVolume = graduallyIncreaseVolume;
+        this.sayTime = sayTime;
+        this.pattern = pattern;
+        this.snooze = snooze;
+        this.vibration = vibration;
+    }
 
     public Pattern getPattern() {
         return pattern;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
@@ -84,8 +150,8 @@ public class Alarm {
         return name;
     }
 
-    public Calendar getDate() {
-        return date;
+    public int getVolume() {
+        return volume;
     }
 
     public boolean isActive() {
@@ -96,16 +162,12 @@ public class Alarm {
         return repeat;
     }
 
-    public boolean isSnooze() {
+    public boolean isSayTime() {
+        return sayTime;
+    }
+
+    public Snooze getSnooze() {
         return snooze;
-    }
-
-    public int getSnoozeMinutes() {
-        return snoozeMinutes;
-    }
-
-    public int getSnoozeTimes() {
-        return snoozeTimes;
     }
 
     public String getTone() {
@@ -116,7 +178,7 @@ public class Alarm {
         return graduallyIncreaseVolume;
     }
 
-    public boolean isVibration() {
+    public Vibration getVibration() {
         return vibration;
     }
 
@@ -129,87 +191,66 @@ public class Alarm {
         return this;
     }
 
-    public Alarm setId(long id) {
+    public Alarm setId(int id) {
         this.id = id;
-
         return this;
     }
 
-    public Alarm setDate(Calendar date) {
-        if(date == null)
-            throw new IllegalArgumentException("Date is null");
-
-        this.date = date;
-
+    public Alarm setVolume(int volume) {
+        this.volume = volume < MIN_VOLUME ? MIN_VOLUME : volume > MAX_VOLUME ? MAX_VOLUME : volume;
         return this;
     }
 
     public Alarm setActive(boolean active) {
         this.active = active;
-
         return this;
     }
 
     public Alarm setRepeat(boolean repeat) {
         this.repeat = repeat;
-
         return this;
     }
 
-    public Alarm setSnooze(boolean snooze) {
+    public Alarm setSayTime(boolean sayTime) {
+        this.sayTime = sayTime;
+        return this;
+    }
+
+    public Alarm setSnooze(Snooze snooze) {
+        if (snooze == null)
+            throw new IllegalArgumentException("Snooze not provided");
         this.snooze = snooze;
-
-        return this;
-    }
-
-    public Alarm setSnoozeMinutes(int snoozeMinutes) {
-        if (snoozeMinutes <= 0)
-            throw new IllegalArgumentException("Snooze time should be more than 0");
-
-        this.snoozeMinutes = snoozeMinutes;
-
-        return this;
-    }
-
-    public Alarm setSnoozeTimes(int snoozeTimes) {
-        this.snoozeTimes = snoozeTimes;
-
         return this;
     }
 
     public Alarm setTone(String tone) {
         if (tone == null)
             throw new IllegalArgumentException("Tone not provided");
-
         this.tone = tone;
-
         return this;
     }
 
     public Alarm setGraduallyIncreaseVolume(boolean graduallyIncreaseVolume) {
         this.graduallyIncreaseVolume = graduallyIncreaseVolume;
-
         return this;
     }
 
-    public Alarm setVibration(boolean vibration) {
+    public Alarm setVibration(Vibration vibration) {
+        if (vibration == null)
+            throw new IllegalArgumentException("Vibration not provided");
         this.vibration = vibration;
-
         return this;
     }
 
     public Alarm setPattern(boolean[] pattern) {
         if (pattern == null)
             throw new IllegalArgumentException("Pattern not provided");
-
-        this.pattern = new Pattern(pattern);
-
+        this.pattern = new Pattern(null, pattern);
         return this;
     }
 
     public Alarm setName(String name) {
         this.name = name;
-
         return this;
     }
 }

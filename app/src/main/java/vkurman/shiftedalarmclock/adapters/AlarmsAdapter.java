@@ -26,6 +26,7 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
@@ -112,7 +113,10 @@ public class AlarmsAdapter extends RecyclerView.Adapter<AlarmsAdapter.AlarmsView
         if(position >= 0 && position < mAlarms.size()) {
             final Alarm alarm = mAlarms.get(position);
 
-            holder.mTime.setText(AlarmUtils.formatTime(alarm.getDate()));
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(alarm.getPattern().getStartDate());
+
+            holder.mTime.setText(AlarmUtils.formatTime(cal));
             holder.mName.setText(alarm.getName());
             holder.mPattern.setText(AlarmUtils.formatPattern(alarm.getPattern()));
             holder.mSwitch.setChecked(alarm.isActive());
