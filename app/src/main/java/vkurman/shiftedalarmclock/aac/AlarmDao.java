@@ -36,7 +36,7 @@ import vkurman.shiftedalarmclock.models.Alarm;
 public interface AlarmDao {
 
     @Query("SELECT * FROM alarm WHERE id = :alarmId")
-    LiveData<Alarm> load(int alarmId);
+    LiveData<Alarm> load(long alarmId);
 
     @Query("SELECT * FROM alarm")
     LiveData<List<Alarm>> loadAll();

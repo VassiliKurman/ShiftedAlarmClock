@@ -27,9 +27,9 @@ import android.support.annotation.NonNull;
 public class AlarmViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
     private final AlarmDatabase mDb;
-    private final int mAlarmId;
+    private final long mAlarmId;
 
-    public AlarmViewModelFactory(AlarmDatabase alarmDatabase, int alarmId) {
+    public AlarmViewModelFactory(AlarmDatabase alarmDatabase, long alarmId) {
         mDb = alarmDatabase;
         mAlarmId = alarmId;
     }

@@ -21,5 +21,5 @@ package vkurman.shiftedalarmclock.interfaces;
  * Version 1.0
  */
 public interface ResultListener {
-    void onResultClick(int id);
+    void onResultClick(long id);
 }

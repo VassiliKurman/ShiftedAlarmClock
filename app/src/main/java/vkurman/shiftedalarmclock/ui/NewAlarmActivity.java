@@ -35,7 +35,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Random;
+import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,7 +60,7 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         CompoundButton.OnCheckedChangeListener, NameDialogFragment.NameDialogListener {
 
     public static final String EXTRA_ALARM_ID = "alarmId";
-    public static final int DEFAULT_ALARM_ID = -1;
+    public static final long DEFAULT_ALARM_ID = -1L;
 
     private static final String TAG = NewAlarmActivity.class.getSimpleName();
 
@@ -79,7 +79,7 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
     // Database reference
     private AlarmDatabase mDb;
     // Alarm id
-    private int mAlarmId;
+    private long mAlarmId;
     // Alarm
     private Alarm mAlarm;
 
@@ -87,8 +87,6 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_alarm);
-        // Setting alarm id to default
-        mAlarmId = DEFAULT_ALARM_ID;
         // Getting ref to database
         mDb = AlarmDatabase.getInstance(getApplicationContext());
         // Binding views
@@ -98,40 +96,32 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
 
         if(savedInstanceState != null && savedInstanceState.containsKey(EXTRA_ALARM_ID)) {
             Log.e(TAG, "Retrieving data from savedInstanceState!");
-            mAlarmId = savedInstanceState.getInt(EXTRA_ALARM_ID, DEFAULT_ALARM_ID);
-        }
-
-        Intent intent = getIntent();
-        if(intent != null && intent.hasExtra(EXTRA_ALARM_ID)) {
-            buttonSave.setText(R.string.text_new_alarm_button_update);
-            if(mAlarmId == DEFAULT_ALARM_ID) {
-                mAlarmId = intent.getIntExtra(EXTRA_ALARM_ID, DEFAULT_ALARM_ID);
-
-                AlarmViewModelFactory factory = new AlarmViewModelFactory(mDb, mAlarmId);
-                final AlarmViewModel viewModel = ViewModelProviders.of(this, factory).get(AlarmViewModel.class);
-                viewModel.getAlarm().observe(this, new Observer<Alarm>() {
-                    @Override
-                    public void onChanged(@Nullable Alarm alarm) {
-                        viewModel.getAlarm().removeObserver(this);
-                        Log.d(TAG, "Receiving database update from LiveData");
-                        mAlarm = alarm;
-                        populateUI(mAlarm);
-                    }
-                });
-            }
+            mAlarmId = savedInstanceState.getLong(EXTRA_ALARM_ID, DEFAULT_ALARM_ID);
+            // Load alarm from database
+            loadAlarm();
         } else {
-            Log.e(TAG, "No intent or no data set in intent!");
-            if(mAlarm == null) {
-                Log.e(TAG, "Creating new alarm!");
-                mAlarm = createAlarm();
+            Intent intent = getIntent();
+            if(intent != null && intent.hasExtra(EXTRA_ALARM_ID)) {
+                buttonSave.setText(R.string.text_new_alarm_button_update);
+                mAlarmId = intent.getLongExtra(EXTRA_ALARM_ID, DEFAULT_ALARM_ID);
+
+
+            } else {
+                Log.e(TAG, "No intent or no data set in intent!");
+                if(mAlarm == null) {
+                    Log.e(TAG, "Creating new alarm!");
+                    mAlarm = createAlarm();
+                }
+                populateUI(mAlarm);
             }
-            populateUI(mAlarm);
+            // Setting alarm id to default
+            mAlarmId = DEFAULT_ALARM_ID;
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt(EXTRA_ALARM_ID, mAlarmId);
+        outState.putLong(EXTRA_ALARM_ID, mAlarmId);
         super.onSaveInstanceState(outState);
     }
 
@@ -162,6 +152,20 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
 
             mAlarm.setSayTime(isChecked);
         }
+    }
+
+    private void loadAlarm() {
+        AlarmViewModelFactory factory = new AlarmViewModelFactory(mDb, mAlarmId);
+        final AlarmViewModel viewModel = ViewModelProviders.of(this, factory).get(AlarmViewModel.class);
+        viewModel.getAlarm().observe(this, new Observer<Alarm>() {
+            @Override
+            public void onChanged(@Nullable Alarm alarm) {
+                viewModel.getAlarm().removeObserver(this);
+                Log.d(TAG, "Receiving database update from LiveData");
+                mAlarm = alarm;
+                populateUI(mAlarm);
+            }
+        });
     }
 
     /**
@@ -261,13 +265,14 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
      * @return Alarm
      */
     private Alarm createAlarm() {
+        long id = Calendar.getInstance().getTimeInMillis();
         String tone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();
         int volume = 100;
         Pattern pattern = new Pattern();
         Snooze snooze = new Snooze();
         Vibration vibration = new Vibration();
 
-        return new Alarm(DEFAULT_ALARM_ID, "Alarm", true, false, tone, volume,
+        return new Alarm(id, "Alarm", true, false, tone, volume,
                 false, false, pattern, snooze, vibration);
     }
 
@@ -280,8 +285,6 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void run() {
                 if(mAlarmId == DEFAULT_ALARM_ID) {
-                    mAlarmId = Math.abs(new Random(Integer.MAX_VALUE).nextInt());
-                    mAlarm.setId(mAlarmId);
                     // Save alarm
                     mDb.alarmDao().save(mAlarm);
                 } else {

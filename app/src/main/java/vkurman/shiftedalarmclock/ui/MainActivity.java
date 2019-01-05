@@ -123,9 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onResultClick(int id) {
-        Log.e(TAG, "Alarm id clicked: " + id);
-
+    public void onResultClick(long id) {
         // Launch NewAlarmActivity adding the itemId as an extra in the intent
         Intent intent = new Intent(MainActivity.this, NewAlarmActivity.class);
         intent.putExtra(NewAlarmActivity.EXTRA_ALARM_ID, id);

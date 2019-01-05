@@ -39,7 +39,7 @@ public class AlarmUtils {
         if(cal == null) {
             return null;
         }
-        return cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE);
+        return formatTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE));
     }
 
     /**

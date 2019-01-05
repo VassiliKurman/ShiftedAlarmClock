@@ -41,8 +41,8 @@ public class Alarm {
     /**
      * Alarm id
      */
-    @PrimaryKey(autoGenerate = true)
-    private int id;
+    @PrimaryKey
+    private long id;
 
     /**
      * Name for alarm
@@ -122,7 +122,7 @@ public class Alarm {
      * @param snooze - Snooze
      * @param vibration - Vibration
      */
-    public Alarm(int id, String name, boolean active, boolean repeat, String tone, int volume,
+    public Alarm(long id, String name, boolean active, boolean repeat, String tone, int volume,
                  boolean graduallyIncreaseVolume, boolean sayTime, Pattern pattern,
                  Snooze snooze, Vibration vibration) {
         this.id = id;
@@ -142,7 +142,7 @@ public class Alarm {
         return pattern;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -191,7 +191,7 @@ public class Alarm {
         return this;
     }
 
-    public Alarm setId(int id) {
+    public Alarm setId(long id) {
         this.id = id;
         return this;
     }

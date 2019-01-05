@@ -29,7 +29,7 @@ public class AlarmViewModel extends ViewModel {
 
     private LiveData<Alarm> alarm;
 
-    AlarmViewModel(AlarmDatabase database, int alarmId) {
+    AlarmViewModel(AlarmDatabase database, long alarmId) {
         alarm = database.alarmDao().load(alarmId);
     }
 
