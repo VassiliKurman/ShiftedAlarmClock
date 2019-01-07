@@ -26,7 +26,7 @@
             android:layout_width="0dp"
             app:layout_constraintHorizontal_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/text_new_alarm_button_save"
+            android:text="@string/text_new_alarm_button_done"
             android:background="?android:attr/selectableItemBackground"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"

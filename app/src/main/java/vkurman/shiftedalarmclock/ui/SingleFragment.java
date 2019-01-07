@@ -16,13 +16,10 @@
 package vkurman.shiftedalarmclock.ui;
 
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +46,9 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
      * Alarm set date.
      */
     private Calendar mCalendar;
+
+    private DateChangeListener dateChangeListener;
+    private TimeChangeListener timeChangeListener;
 
     @BindView(R.id.tv_date)
     TextView tvDate;
@@ -101,52 +101,24 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         tvTime.setText(AlarmUtils.formatTime(hourOfDay, minute));
+        if(timeChangeListener != null) {
+            timeChangeListener.onTimeChanged(hourOfDay, minute);
+        }
     }
 
     @Override
     public void onDateSet(DatePicker view, int year, int month, int day) {
         tvDate.setText(AlarmUtils.formatDate(year, month, day));
-    }
-
-    /**
-     * DatePickerFragment from https://developer.android.com/guide/topics/ui/controls/pickers
-     */
-    public static class DatePickerFragment extends DialogFragment {
-
-        DatePickerDialog.OnDateSetListener dateSetListener;
-
-        @Override
-        @NonNull
-        public Dialog onCreateDialog(@NonNull Bundle savedInstanceState) {
-            // Use the current date as the default date in the picker
-            final Calendar c = Calendar.getInstance();
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
-
-            // Create a new instance of DatePickerDialog and return it
-            return new DatePickerDialog(Objects.requireNonNull(getActivity()), dateSetListener, year, month, day);
+        if(dateChangeListener != null) {
+            dateChangeListener.onDateChanged(year, month, day);
         }
     }
 
-    /**
-     * TimePickerFragment from https://developer.android.com/guide/topics/ui/controls/pickers
-     */
-    public static class TimePickerFragment extends DialogFragment {
+    public void setTimeChangeListener(TimeChangeListener timeChangeListener) {
+        this.timeChangeListener = timeChangeListener;
+    }
 
-        TimePickerDialog.OnTimeSetListener timeSetListener;
-
-        @Override
-        @NonNull
-        public Dialog onCreateDialog(@NonNull Bundle savedInstanceState) {
-            // Use the current time as the default values for the picker
-            final Calendar c = Calendar.getInstance();
-            int hour = c.get(Calendar.HOUR_OF_DAY);
-            int minute = c.get(Calendar.MINUTE);
-
-            // Create a new instance of TimePickerDialog and return it
-            return new TimePickerDialog(getActivity(), timeSetListener, hour, minute,
-                    DateFormat.is24HourFormat(getActivity()));
-        }
+    public void setDateChangeListener(DateChangeListener dateChangeListener) {
+        this.dateChangeListener = dateChangeListener;
     }
 }

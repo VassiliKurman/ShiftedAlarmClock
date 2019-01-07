@@ -57,10 +57,13 @@ import vkurman.shiftedalarmclock.models.Vibration;
  * Version 1.0
  */
 public class NewAlarmActivity extends AppCompatActivity implements View.OnClickListener,
-        CompoundButton.OnCheckedChangeListener, NameDialogFragment.NameDialogListener {
+        CompoundButton.OnCheckedChangeListener, NameDialogFragment.NameDialogListener,
+        TimeChangeListener, DateChangeListener {
 
     public static final String EXTRA_ALARM_ID = "alarmId";
+    public static final String EXTRA_ALARM_NEW = "new";
     public static final long DEFAULT_ALARM_ID = -1L;
+    public static final boolean DEFAULT_ALARM_NEW = false;
 
     private static final String TAG = NewAlarmActivity.class.getSimpleName();
 
@@ -80,6 +83,8 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
     private AlarmDatabase mDb;
     // Alarm id
     private long mAlarmId;
+    // New alarm
+    private boolean mNew;
     // Alarm
     private Alarm mAlarm;
 
@@ -97,41 +102,64 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         if(savedInstanceState != null && savedInstanceState.containsKey(EXTRA_ALARM_ID)) {
             Log.e(TAG, "Retrieving data from savedInstanceState!");
             mAlarmId = savedInstanceState.getLong(EXTRA_ALARM_ID, DEFAULT_ALARM_ID);
+            mNew = savedInstanceState.getBoolean(EXTRA_ALARM_NEW, DEFAULT_ALARM_NEW);
             // Load alarm from database
             loadAlarm();
         } else {
             Intent intent = getIntent();
             if(intent != null && intent.hasExtra(EXTRA_ALARM_ID)) {
-                buttonSave.setText(R.string.text_new_alarm_button_update);
                 mAlarmId = intent.getLongExtra(EXTRA_ALARM_ID, DEFAULT_ALARM_ID);
-
-
+                mNew = intent.getBooleanExtra(EXTRA_ALARM_NEW, DEFAULT_ALARM_NEW);
+                // Load alarm from database
+                loadAlarm();
             } else {
                 Log.e(TAG, "No intent or no data set in intent!");
                 if(mAlarm == null) {
                     Log.e(TAG, "Creating new alarm!");
                     mAlarm = createAlarm();
+                    Log.e(TAG, "New alarm created!");
+                    mAlarmId = mAlarm.getId();
+                    mNew = true;
                 }
-                populateUI(mAlarm);
             }
-            // Setting alarm id to default
-            mAlarmId = DEFAULT_ALARM_ID;
+            populateUI(mAlarm);
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putLong(EXTRA_ALARM_ID, mAlarmId);
+        outState.putBoolean(EXTRA_ALARM_NEW, mNew);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onClick(View view) {
-        if(view == buttonSave) {
-            onSaveButtonClicked();
+        if(view == buttonSave && mAlarm != null) {
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    if(mNew) {
+                        // Save alarm
+                        mDb.alarmDao().save(mAlarm);
+                    } else {
+                        // Update alarm
+                        mDb.alarmDao().update(mAlarm);
+                    }
+                }
+            });
         } else if(view == buttonCancel) {
-            finish();
+            // Delete alarm if it new one
+            if(mNew && mAlarm != null) {
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.alarmDao().delete(mAlarm);
+                    }
+                });
+            }
         }
+        finish();
     }
 
     @Override
@@ -173,21 +201,31 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
      *
      * @param alarm - Alarm
      */
-    private void populateUI(Alarm alarm) {
+    private void populateUI(final Alarm alarm) {
         if(alarm == null) {
             return;
         }
 
         if(alarm.getPattern() == null || alarm.getPattern().getPattern().length == 1) {
+            SingleFragment singleFragment = new SingleFragment();
             fragmentManager.beginTransaction()
-                    .add(R.id.container_for_fragment, new SingleFragment())
+                    .add(R.id.container_for_fragment, singleFragment)
                     .commit();
+            // Setting date in fragment same as alarm
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(alarm.getPattern().getStartDate());
+            // TODO update text fields
+//            singleFragment.tvDate.setText(AlarmUtils.formatDate(cal));
+//            singleFragment.tvTime.setText(AlarmUtils.formatTime(cal));
+
+            singleFragment.setTimeChangeListener(this);
+            singleFragment.setDateChangeListener(this);
         } else if(alarm.getPattern().getPattern().length == 7) {
-            Pattern pat = alarm.getPattern();
-            WeekFragment fragment = new WeekFragment();
+            Pattern pattern = alarm.getPattern();
+            WeekFragment weekFragment = new WeekFragment();
             // Adding fragment to activity
             fragmentManager.beginTransaction()
-                    .add(R.id.container_for_fragment, fragment)
+                    .add(R.id.container_for_fragment, weekFragment)
                     .commit();
             // Setting checkboxes
 //            fragment.checkboxMonday.setChecked(pat.getPatternValue(0));
@@ -197,6 +235,8 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
 //            fragment.checkboxFriday.setChecked(pat.getPatternValue(4));
 //            fragment.checkboxSaturday.setChecked(pat.getPatternValue(5));
 //            fragment.checkboxSunday.setChecked(pat.getPatternValue(6));
+
+            weekFragment.setTimeChangeListener(this);
         } else {
             // TODO add custom fragment
         }
@@ -269,31 +309,14 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         String tone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();
         int volume = 100;
         Pattern pattern = new Pattern();
+        pattern.setStartDate(Calendar.getInstance().getTime());
+        pattern.setPattern(new boolean[]{true});
+
         Snooze snooze = new Snooze();
         Vibration vibration = new Vibration();
 
         return new Alarm(id, "Alarm", true, false, tone, volume,
                 false, false, pattern, snooze, vibration);
-    }
-
-    private void onSaveButtonClicked() {
-        if(mAlarm == null) {
-            return;
-        }
-        // Saving alarm to database using Executor
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                if(mAlarmId == DEFAULT_ALARM_ID) {
-                    // Save alarm
-                    mDb.alarmDao().save(mAlarm);
-                } else {
-                    // Update alarm
-                    mDb.alarmDao().update(mAlarm);
-                }
-                finish();
-            }
-        });
     }
 
     /**
@@ -317,5 +340,34 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
                 Toast.makeText(this, R.string.text_name_not_specified, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    public void onTimeChanged(int hourOfDay, int minute) {
+        if(mAlarm == null) {
+            return;
+        }
+        Calendar cal = Calendar.getInstance();
+        if(mAlarm.getPattern().getStartDate() != null) {
+            cal.setTime(mAlarm.getPattern().getStartDate());
+        }
+        cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        cal.set(Calendar.MINUTE, minute);
+        mAlarm.getPattern().setStartDate(cal.getTime());
+    }
+
+    @Override
+    public void onDateChanged(int year, int month, int day) {
+        if(mAlarm == null) {
+            return;
+        }
+        Calendar cal = Calendar.getInstance();
+        if(mAlarm.getPattern().getStartDate() != null) {
+            cal.setTime(mAlarm.getPattern().getStartDate());
+        }
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.MONTH, month);
+        cal.set(Calendar.DAY_OF_MONTH, day);
+        mAlarm.getPattern().setStartDate(cal.getTime());
     }
 }

@@ -15,14 +15,11 @@
  */
 package vkurman.shiftedalarmclock.ui;
 
-import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +41,8 @@ import vkurman.shiftedalarmclock.utils.AlarmUtils;
  */
 public class WeekFragment extends Fragment implements View.OnClickListener,
         TimePickerDialog.OnTimeSetListener, CompoundButton.OnCheckedChangeListener {
+
+    private TimeChangeListener timeChangeListener;
 
     @BindView(R.id.checkbox_monday) CheckBox checkboxMonday;
     @BindView(R.id.checkbox_tuesday) CheckBox checkboxTuesday;
@@ -122,26 +121,12 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         tvTime.setText(AlarmUtils.formatTime(hourOfDay, minute));
+        if(timeChangeListener != null) {
+            timeChangeListener.onTimeChanged(hourOfDay, minute);
+        }
     }
 
-    /**
-     * TimePickerFragment from https://developer.android.com/guide/topics/ui/controls/pickers
-     */
-    public static class TimePickerFragment extends DialogFragment {
-
-        TimePickerDialog.OnTimeSetListener timeSetListener;
-
-        @Override
-        @NonNull
-        public Dialog onCreateDialog(@NonNull Bundle savedInstanceState) {
-            // Use the current time as the default values for the picker
-            final Calendar c = Calendar.getInstance();
-            int hour = c.get(Calendar.HOUR_OF_DAY);
-            int minute = c.get(Calendar.MINUTE);
-
-            // Create a new instance of TimePickerDialog and return it
-            return new TimePickerDialog(getActivity(), timeSetListener, hour, minute,
-                    DateFormat.is24HourFormat(getActivity()));
-        }
+    public void setTimeChangeListener(TimeChangeListener timeChangeListener) {
+        this.timeChangeListener = timeChangeListener;
     }
 }

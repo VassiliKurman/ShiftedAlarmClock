@@ -14,6 +14,7 @@
     <!-- New Alarm Activity -->
     <string name="text_new_alarm_button_save">Save</string>
     <string name="text_new_alarm_button_update">Update</string>
+    <string name="text_new_alarm_button_done">Done</string>
     <string name="text_new_alarm_button_cancel">Cancel</string>
     <string name="text_new_alarm_name">Alarm Name</string>
     <string name="text_new_alarm_tone_volume">Alarm Tone and Volume</string>

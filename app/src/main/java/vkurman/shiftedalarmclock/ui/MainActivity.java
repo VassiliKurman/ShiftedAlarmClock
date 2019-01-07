@@ -109,6 +109,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onChanged(@Nullable List<Alarm> alarms) {
                 Log.e(TAG, "Updating alarms from LiveData in ViewModel");
+                for (Alarm alarm: alarms) {
+                    Log.d(TAG, "Alarm id: " + alarm.getId()
+                            + "\nName: " + alarm.getName()
+                            + "\nActive: " + alarm.isActive()
+                            + "\nRepeat: " + alarm.isRepeat()
+                            + "\nTone: " + alarm.getTone()
+                            + "\nVolume: " + alarm.getVolume()
+                            + "\nGradually Increase Volume: " + alarm.isGraduallyIncreaseVolume()
+                            + "\nSay time: " + alarm.isSayTime()
+                            + "\nPattern: " + alarm.getPattern().getStartDate() + " " + alarm.getPattern().getPattern().toString()
+                            + "\nSnooze: " + alarm.getSnooze().isSnoozeEnabled() + " interval=" + alarm.getSnooze().getSnoozeInterval() + " repeat=" + alarm.getSnooze().getSnoozeRepeat()
+                            + "\nVibration: " + alarm.getVibration().isVibrationEnabled());
+                }
                 alarmsAdapter.updateData(alarms);
             }
         });
@@ -118,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         if(view == fab) {
             Intent intent = new Intent(this, NewAlarmActivity.class);
+            intent.putExtra(NewAlarmActivity.EXTRA_ALARM_NEW, true);
             startActivity(intent);
         }
     }
@@ -127,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Launch NewAlarmActivity adding the itemId as an extra in the intent
         Intent intent = new Intent(MainActivity.this, NewAlarmActivity.class);
         intent.putExtra(NewAlarmActivity.EXTRA_ALARM_ID, id);
+        intent.putExtra(NewAlarmActivity.EXTRA_ALARM_NEW, false);
         startActivity(intent);
     }
 }
