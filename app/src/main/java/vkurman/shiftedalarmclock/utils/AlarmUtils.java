@@ -87,6 +87,21 @@ public class AlarmUtils {
     }
 
     /**
+     * Return String representation of alarm date in format "dd MM YYYY".
+     *
+     * @param cal - Calendar
+     * @return String
+     */
+    public static String formatShortDate(Calendar cal) {
+        if(cal == null) {
+            return null;
+        }
+        return cal.get(Calendar.DAY_OF_MONTH) + " "
+                + cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) + " "
+                + cal.get(Calendar.YEAR);
+    }
+
+    /**
      * Return String representation of alarm date in format "dd MMM YYYY".
      *
      * @param year - int

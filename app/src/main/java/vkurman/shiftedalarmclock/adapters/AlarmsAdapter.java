@@ -118,7 +118,11 @@ public class AlarmsAdapter extends RecyclerView.Adapter<AlarmsAdapter.AlarmsView
 
             holder.mTime.setText(AlarmUtils.formatTime(cal));
             holder.mName.setText(alarm.getName());
-            holder.mPattern.setText(AlarmUtils.formatPattern(alarm.getPattern()));
+            if(alarm.getPattern().getPattern().length == 1) {
+                holder.mPattern.setText(AlarmUtils.formatShortDate(cal));
+            } else {
+                holder.mPattern.setText(AlarmUtils.formatPattern(alarm.getPattern()));
+            }
             holder.mSwitch.setChecked(alarm.isActive());
         }
     }
