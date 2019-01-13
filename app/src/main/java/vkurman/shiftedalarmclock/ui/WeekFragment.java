@@ -35,6 +35,8 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import vkurman.shiftedalarmclock.R;
+import vkurman.shiftedalarmclock.interfaces.DateChangeListener;
+import vkurman.shiftedalarmclock.interfaces.PatternChangeListener;
 import vkurman.shiftedalarmclock.utils.AlarmUtils;
 
 /**

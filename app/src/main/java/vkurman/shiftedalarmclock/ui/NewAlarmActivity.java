@@ -45,6 +45,8 @@ import vkurman.shiftedalarmclock.aac.AlarmDatabase;
 import vkurman.shiftedalarmclock.aac.AlarmViewModel;
 import vkurman.shiftedalarmclock.aac.AlarmViewModelFactory;
 import vkurman.shiftedalarmclock.aac.AppExecutors;
+import vkurman.shiftedalarmclock.interfaces.DateChangeListener;
+import vkurman.shiftedalarmclock.interfaces.PatternChangeListener;
 import vkurman.shiftedalarmclock.models.Alarm;
 import vkurman.shiftedalarmclock.models.Pattern;
 import vkurman.shiftedalarmclock.models.Snooze;

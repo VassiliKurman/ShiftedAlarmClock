@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package vkurman.shiftedalarmclock.ui;
+package vkurman.shiftedalarmclock.interfaces;
+
+import java.util.Calendar;
 
 /**
- * PatternChangeListener
- * Created by Vassili Kurman on 13/01/2019.
+ * DateChangeListener
+ * Created by Vassili Kurman on 06/01/2019.
  * Version 1.0
  */
-public interface PatternChangeListener {
-    void onPatternChanged(boolean[] pattern);
+public interface DateChangeListener {
+    void onDateChanged(Calendar calendar);
 }
