@@ -62,7 +62,7 @@ import vkurman.shiftedalarmclock.utils.AlarmUtils;
  */
 public class NewAlarmActivity extends AppCompatActivity implements View.OnClickListener,
         CompoundButton.OnCheckedChangeListener, NameDialogFragment.NameDialogListener,
-        DateChangeListener, PatternChangeListener {
+        DateChangeListener, PatternChangeListener, NumberDialogPicker.NumberDialogListener {
 
     public static final String EXTRA_ALARM_ID = "alarmId";
     public static final String EXTRA_ALARM_NEW = "new";
@@ -91,6 +91,10 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
     private boolean mNew;
     // Alarm
     private Alarm mAlarm;
+    // Pattern type
+    private Type patternType;
+    // Pattern type
+    private int action;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -208,7 +212,8 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
         // Displaying fragment for pattern
-        actionOnFragment(mAlarm.getPattern().getPattern().length, AlarmUtils.ACTION_ADD_FRAGMENT);
+        action = AlarmUtils.ACTION_ADD_FRAGMENT;
+        actionOnFragment(mAlarm.getPattern().getPattern().length, action);
 
         tvAlarmName.setText(mAlarm.getName());
 
@@ -218,6 +223,8 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         pickerAlarmType.setValue(
                 mAlarm.getPattern().getPattern().length == 1 ? 0
                         : mAlarm.getPattern().getPattern().length == 7 ? 1 : 2);
+        patternType = mAlarm.getPattern().getPattern().length == 1 ? Type.Single
+                : mAlarm.getPattern().getPattern().length == 7 ? Type.Week : Type.Pattern;
         // Setting alarm tone
         if(mAlarm.getTone() != null) {
             tvToneName.setText(mAlarm.getTone());
@@ -246,15 +253,20 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
             public void onValueChange(NumberPicker pickerAlarmType, int oldVal, int newVal) {
                 Snackbar.make(pickerAlarmType, Type.values()[newVal].toString(), Snackbar.LENGTH_SHORT)
                         .setAction("Action", null).show();
+                // Setting action
+                action = AlarmUtils.ACTION_REPLACE_FRAGMENT;
                 switch (newVal) {
                     case 0:
-                        actionOnFragment(1, AlarmUtils.ACTION_REPLACE_FRAGMENT);
+                        patternType = Type.Single;
+                        actionOnFragment(1, action);
                         break;
                     case 1:
-                        actionOnFragment(7, AlarmUtils.ACTION_REPLACE_FRAGMENT);
+                        patternType = Type.Week;
+                        actionOnFragment(7, action);
                         break;
                     case 2:
-                        // TODO add action for custom pattern fragment
+                        // Requesting pattern length
+                        onPatternLengthRequest();
                         break;
                 }
             }
@@ -279,7 +291,6 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         bundle.putLong(AlarmUtils.ARG_CALENDAR, mAlarm.getPattern().getStartDate().getTime());
 
         switch (patternLength) {
-
             case 1:
                 SingleFragment singleFragment = new SingleFragment();
                 if(mAlarm.getPattern().getPattern().length != 1) {
@@ -326,7 +337,25 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
                 weekFragment.setPatternChangeListener(this);
                 break;
              default:
-                 // TODO add custom fragment
+                 PatternFragment patternFragment = new PatternFragment();
+                 if(mAlarm.getPattern().getPattern().length != patternLength) {
+                     mAlarm.getPattern().setPattern(new boolean[patternLength]);
+                 }
+                 bundle.putString(AlarmUtils.ARG_PATTERN, AlarmUtils.formatPatternToString(mAlarm.getPattern()));
+                 patternFragment.setArguments(bundle);
+                 // Attaching Fragment to this Activity
+                 if(action == AlarmUtils.ACTION_ADD_FRAGMENT) {
+                     fragmentManager.beginTransaction()
+                             .add(R.id.container_for_fragment, patternFragment)
+                             .commit();
+                 } else if(action == AlarmUtils.ACTION_REPLACE_FRAGMENT) {
+                     fragmentManager.beginTransaction()
+                             .replace(R.id.container_for_fragment, patternFragment)
+                             .commit();
+                 }
+                 // Setting DateChangeListener and PatternChangeListener
+                 patternFragment.setDateChangeListener(this);
+                 patternFragment.setPatternChangeListener(this);
         }
     }
 
@@ -387,5 +416,29 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
         mAlarm.getPattern().setPattern(pattern);
+    }
+
+    /**
+     * Method to show text input dialog for pattern length.
+     */
+    public void onPatternLengthRequest() {
+        // Create an instance of the dialog fragment and show it
+        NumberDialogPicker dialog = new NumberDialogPicker();
+        dialog.show(getSupportFragmentManager(), TAG);
+    }
+
+    @Override
+    public void onDialogNumberSet(NumberDialogPicker dialog) {
+        int patternLength = dialog.getNumber();
+        patternType = Type.Pattern;
+        actionOnFragment(patternLength, action);
+    }
+
+    @Override
+    public void onDialogNumberCancel(NumberDialogPicker dialog) {
+        Snackbar.make(pickerAlarmType, "Pattern length not set", Snackbar.LENGTH_SHORT)
+                .setAction("error", null).show();
+        // Set pattern back to previous one
+        pickerAlarmType.setValue(patternType == Type.Single ? 0 : 1);
     }
 }

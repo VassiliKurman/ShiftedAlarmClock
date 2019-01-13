@@ -22,6 +22,7 @@
     <string name="text_new_alarm_say_time">Say Time</string>
     <string name="text_new_alarm_weekday">Weekday</string>
     <string name="text_new_alarm_time">Time</string>
+    <string name="text_new_alarm_start">Starts:</string>
 
     <!-- Tools text -->
     <string name="tools_text_date">01 Jan 1970</string>
@@ -32,7 +33,10 @@
     <string name="tools_text_vibration_name">Vibration name</string>
 
     <!-- Dialog text -->
+    <string name="dialog_title_text_name">Alarm name input</string>
+    <string name="dialog_title_number_pattern">Alarm pattern input</string>
     <string name="dialog_ok">OK</string>
+    <string name="dialog_set">Set</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_hint_name">Enter alarm name</string>
     <string name="text_name_not_specified">Name not specified!</string>

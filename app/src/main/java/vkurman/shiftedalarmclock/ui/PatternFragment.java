@@ -15,16 +15,22 @@
  */
 package vkurman.shiftedalarmclock.ui;
 
+import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
+import android.widget.FrameLayout;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -39,10 +45,14 @@ import vkurman.shiftedalarmclock.interfaces.PatternChangeListener;
 import vkurman.shiftedalarmclock.utils.AlarmUtils;
 
 /**
- * WeekFragment is a simple {@link Fragment} subclass.
+ * PatternFragment is a fragment for custom patterns.
+ *
+ * Created by Vassili Kurman on 13/01/2019.
+ * Version 1.0
  */
-public class WeekFragment extends Fragment implements View.OnClickListener,
-        TimePickerDialog.OnTimeSetListener, CompoundButton.OnCheckedChangeListener {
+public class PatternFragment extends Fragment implements View.OnClickListener,
+        CompoundButton.OnCheckedChangeListener,
+        TimePickerDialog.OnTimeSetListener, DatePickerDialog.OnDateSetListener {
 
     /**
      * Alarm set date.
@@ -61,18 +71,15 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
      */
     private PatternChangeListener mPatternChangeListener;
 
-    @BindView(R.id.checkbox_monday) CheckBox checkboxMonday;
-    @BindView(R.id.checkbox_tuesday) CheckBox checkboxTuesday;
-    @BindView(R.id.checkbox_wednesday) CheckBox checkboxWednesday;
-    @BindView(R.id.checkbox_thursday) CheckBox checkboxThursday;
-    @BindView(R.id.checkbox_friday) CheckBox checkboxFriday;
-    @BindView(R.id.checkbox_saturday) CheckBox checkboxSaturday;
-    @BindView(R.id.checkbox_sunday) CheckBox checkboxSunday;
-    @BindView(R.id.tv_week_time) TextView tvTime;
+    @BindView(R.id.pattern_container)
+    FrameLayout tvContainer;
+    @BindView(R.id.tv_pattern_date)
+    TextView tvDate;
+    @BindView(R.id.tv_pattern_time)
+    TextView tvTime;
 
-    public WeekFragment() {
+    public PatternFragment(){
         // Required empty public constructor
-        mPattern = new boolean[7];
     }
 
     @Override
@@ -86,7 +93,6 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
         } else if (getArguments() != null) {
             mCalendar = Calendar.getInstance();
             mCalendar.setTimeInMillis(getArguments().getLong(AlarmUtils.ARG_CALENDAR));
-            mCalendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
             mPattern = AlarmUtils.formatStringToPattern(getArguments().getString(AlarmUtils.ARG_PATTERN));
         }
     }
@@ -95,40 +101,36 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_week, container, false);
+        View view = inflater.inflate(R.layout.fragment_pattern, container, false);
         ButterKnife.bind(this, view);
 
-        checkboxMonday.setChecked(mPattern[0]);
-        checkboxMonday.setOnCheckedChangeListener(this);
-        checkboxTuesday.setChecked(mPattern[1]);
-        checkboxTuesday.setOnCheckedChangeListener(this);
-        checkboxWednesday.setChecked(mPattern[2]);
-        checkboxWednesday.setOnCheckedChangeListener(this);
-        checkboxThursday.setChecked(mPattern[3]);
-        checkboxThursday.setOnCheckedChangeListener(this);
-        checkboxFriday.setChecked(mPattern[4]);
-        checkboxFriday.setOnCheckedChangeListener(this);
-        checkboxSaturday.setChecked(mPattern[5]);
-        checkboxSaturday.setOnCheckedChangeListener(this);
-        checkboxSunday.setChecked(mPattern[6]);
-        checkboxSunday.setOnCheckedChangeListener(this);
-
+        tvDate.setText(AlarmUtils.formatDate(mCalendar));
         tvTime.setText(AlarmUtils.formatTime(mCalendar));
+        tvDate.setOnClickListener(this);
         tvTime.setOnClickListener(this);
+
+//        GridLayout gridLayout = new GridLayout(getActivity());
+//        gridLayout.setColumnCount(mPattern.length > 7 ? 7 : mPattern.length);
+//        gridLayout.setRowCount(mPattern.length > 7 ? (int) Math.ceil(mPattern.length / 7) : 1);
+        LinearLayout layout = new LinearLayout(getContext());
+        for(boolean pattern: mPattern) {
+            CheckBox checkbox = new CheckBox(getActivity());
+            checkbox.setChecked(pattern);
+            checkbox.setOnCheckedChangeListener(this);
+            layout.addView(checkbox);
+        }
+        tvContainer.addView(layout);
 
         return view;
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putLong(AlarmUtils.ARG_CALENDAR, mCalendar.getTimeInMillis());
-        outState.putString(AlarmUtils.ARG_PATTERN, AlarmUtils.formatPatternToString(mPattern));
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public void onClick(View view) {
-        if(view == tvTime) {
+        if(view == tvDate) {
+            DatePickerFragment datePickerFragment = new DatePickerFragment();
+            datePickerFragment.dateSetListener = this;
+            datePickerFragment.show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "datePicker");
+        } else if(view == tvTime) {
             TimePickerFragment timePickerFragment = new TimePickerFragment();
             timePickerFragment.timeSetListener = this;
             timePickerFragment.show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "timePicker");
@@ -137,45 +139,45 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(buttonView == checkboxMonday) {
-            mPattern[0] = isChecked;
-            Snackbar.make(checkboxMonday, "Monday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
-                    .setAction("Monday", null).show();
-        } else if(buttonView == checkboxTuesday) {
-            mPattern[1] = isChecked;
-            Snackbar.make(checkboxTuesday, "Tuesday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
-                    .setAction("Tuesday", null).show();
-        } else if(buttonView == checkboxWednesday) {
-            mPattern[2] = isChecked;
-            Snackbar.make(checkboxWednesday, "Wednesday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
-                    .setAction("Wednesday", null).show();
-        } else if(buttonView == checkboxThursday) {
-            mPattern[3] = isChecked;
-            Snackbar.make(checkboxThursday, "Thursday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
-                    .setAction("Thursday", null).show();
-        } else if(buttonView == checkboxFriday) {
-            mPattern[4] = isChecked;
-            Snackbar.make(checkboxFriday, "Friday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
-                    .setAction("Friday", null).show();
-        } else if(buttonView == checkboxSaturday) {
-            mPattern[5] = isChecked;
-            Snackbar.make(checkboxSaturday, "Saturday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
-                    .setAction("Saturday", null).show();
-        } else if(buttonView == checkboxSunday) {
-            mPattern[6] = isChecked;
-            Snackbar.make(checkboxSunday, "Sunday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
-                    .setAction("Sunday", null).show();
-        }
+
         // Trigger pattern change listener to update
         onPatternChanged();
     }
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        tvTime.setText(AlarmUtils.formatTime(hourOfDay, minute));
+        Calendar tempCal = (Calendar) mCalendar.clone();
+        tempCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        tempCal.set(Calendar.MINUTE, minute);
 
-        mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-        mCalendar.set(Calendar.MINUTE, minute);
+        if (tempCal.after(Calendar.getInstance())) {
+            Snackbar.make(tvDate, "Time set before current time!", Snackbar.LENGTH_SHORT)
+                    .setAction("Date", null).show();
+            return;
+        }
+
+        mCalendar = tempCal;
+        tvTime.setText(AlarmUtils.formatTime(hourOfDay, minute));
+        if(mDateChangeListener != null) {
+            mDateChangeListener.onDateChanged(mCalendar);
+        }
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int month, int day) {
+        Calendar tempCal = (Calendar) mCalendar.clone();
+        tempCal.set(Calendar.YEAR, year);
+        tempCal.set(Calendar.MONTH, month);
+        tempCal.set(Calendar.DAY_OF_MONTH, day);
+
+        if (tempCal.before(Calendar.getInstance())) {
+            Snackbar.make(tvDate, "Date set before current date!", Snackbar.LENGTH_SHORT)
+                    .setAction("Date", null).show();
+            return;
+        }
+
+        mCalendar = tempCal;
+        tvDate.setText(AlarmUtils.formatDate(year, month, day));
         if(mDateChangeListener != null) {
             mDateChangeListener.onDateChanged(mCalendar);
         }
