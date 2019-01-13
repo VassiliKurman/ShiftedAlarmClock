@@ -59,7 +59,7 @@ import vkurman.shiftedalarmclock.utils.AlarmUtils;
  */
 public class NewAlarmActivity extends AppCompatActivity implements View.OnClickListener,
         CompoundButton.OnCheckedChangeListener, NameDialogFragment.NameDialogListener,
-        TimeChangeListener, DateChangeListener {
+        DateChangeListener {
 
     public static final String EXTRA_ALARM_ID = "alarmId";
     public static final String EXTRA_ALARM_NEW = "new";
@@ -217,8 +217,7 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
             fragmentManager.beginTransaction()
                     .add(R.id.container_for_fragment, singleFragment)
                     .commit();
-            // Setting Date and Time change listener
-            singleFragment.setTimeChangeListener(this);
+            // Setting Date change listener
             singleFragment.setDateChangeListener(this);
         } else if(alarm.getPattern().getPattern().length == 7) {
             WeekFragment weekFragment = new WeekFragment();
@@ -232,7 +231,7 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
                     .add(R.id.container_for_fragment, weekFragment)
                     .commit();
 
-            weekFragment.setTimeChangeListener(this);
+            weekFragment.setDateChangeListener(this);
         } else {
             // TODO add custom fragment
         }
@@ -339,31 +338,10 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onTimeChanged(int hourOfDay, int minute) {
-        if(mAlarm == null) {
+    public void onDateChanged(Calendar calendar) {
+        if(mAlarm == null || calendar == null) {
             return;
         }
-        Calendar cal = Calendar.getInstance();
-        if(mAlarm.getPattern().getStartDate() != null) {
-            cal.setTime(mAlarm.getPattern().getStartDate());
-        }
-        cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-        cal.set(Calendar.MINUTE, minute);
-        mAlarm.getPattern().setStartDate(cal.getTime());
-    }
-
-    @Override
-    public void onDateChanged(int year, int month, int day) {
-        if(mAlarm == null) {
-            return;
-        }
-        Calendar cal = Calendar.getInstance();
-        if(mAlarm.getPattern().getStartDate() != null) {
-            cal.setTime(mAlarm.getPattern().getStartDate());
-        }
-        cal.set(Calendar.YEAR, year);
-        cal.set(Calendar.MONTH, month);
-        cal.set(Calendar.DAY_OF_MONTH, day);
-        mAlarm.getPattern().setStartDate(cal.getTime());
+        mAlarm.getPattern().setStartDate(calendar.getTime());
     }
 }

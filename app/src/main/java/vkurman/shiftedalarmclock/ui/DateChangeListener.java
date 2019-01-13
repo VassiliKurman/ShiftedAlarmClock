@@ -15,11 +15,13 @@
  */
 package vkurman.shiftedalarmclock.ui;
 
+import java.util.Calendar;
+
 /**
  * DateChangeListener
  * Created by Vassili Kurman on 06/01/2019.
  * Version 1.0
  */
 public interface DateChangeListener {
-    void onDateChanged(int year, int month, int day);
+    void onDateChanged(Calendar calendar);
 }

@@ -45,9 +45,10 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
      * Alarm set date.
      */
     private Calendar mCalendar;
-
-    private DateChangeListener dateChangeListener;
-    private TimeChangeListener timeChangeListener;
+    /**
+     * Date change listener
+     */
+    private DateChangeListener mDateChangeListener;
 
     @BindView(R.id.tv_date)
     TextView tvDate;
@@ -108,11 +109,12 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+        tvTime.setText(AlarmUtils.formatTime(hourOfDay, minute));
+
         mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
         mCalendar.set(Calendar.MINUTE, minute);
-        tvTime.setText(AlarmUtils.formatTime(hourOfDay, minute));
-        if(timeChangeListener != null) {
-            timeChangeListener.onTimeChanged(hourOfDay, minute);
+        if(mDateChangeListener != null) {
+            mDateChangeListener.onDateChanged(mCalendar);
         }
     }
 
@@ -122,16 +124,16 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
         mCalendar.set(Calendar.MONTH, month);
         mCalendar.set(Calendar.DAY_OF_MONTH, day);
         tvDate.setText(AlarmUtils.formatDate(year, month, day));
-        if(dateChangeListener != null) {
-            dateChangeListener.onDateChanged(year, month, day);
+        if(mDateChangeListener != null) {
+            mDateChangeListener.onDateChanged(mCalendar);
         }
     }
 
-    public void setTimeChangeListener(TimeChangeListener timeChangeListener) {
-        this.timeChangeListener = timeChangeListener;
-    }
-
+    /**
+     * Setting {@link DateChangeListener}
+     * @param dateChangeListener - {@link DateChangeListener}
+     */
     public void setDateChangeListener(DateChangeListener dateChangeListener) {
-        this.dateChangeListener = dateChangeListener;
+        this.mDateChangeListener = dateChangeListener;
     }
 }

@@ -127,6 +127,23 @@ public class AlarmUtils {
     }
 
     /**
+     * Return String representation of alarm pattern to pass between activities.
+     *
+     * @param pattern - Pattern
+     * @return String
+     */
+    public static String formatPatternToString(boolean[] pattern) {
+        if(pattern == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(boolean on: pattern) {
+            sb.append(on ? "1 " : "0 ");
+        }
+        return sb.toString();
+    }
+
+    /**
      * Return boolean[] representation of alarm pattern passed between activities.
      *
      * @param pattern - Pattern

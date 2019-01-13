@@ -42,7 +42,18 @@ import vkurman.shiftedalarmclock.utils.AlarmUtils;
 public class WeekFragment extends Fragment implements View.OnClickListener,
         TimePickerDialog.OnTimeSetListener, CompoundButton.OnCheckedChangeListener {
 
-    private TimeChangeListener timeChangeListener;
+    /**
+     * Alarm set date.
+     */
+    private Calendar mCalendar;
+    /**
+     * Alarm set date.
+     */
+    private boolean[] mPattern;
+    /**
+     * Date change listener
+     */
+    private DateChangeListener mDateChangeListener;
 
     @BindView(R.id.checkbox_monday) CheckBox checkboxMonday;
     @BindView(R.id.checkbox_tuesday) CheckBox checkboxTuesday;
@@ -55,11 +66,22 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
 
     public WeekFragment() {
         // Required empty public constructor
+        mPattern = new boolean[7];
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mCalendar = Calendar.getInstance();
+            mCalendar.setTimeInMillis(savedInstanceState.getLong(AlarmUtils.ARG_CALENDAR));
+            mPattern = AlarmUtils.formatStringToPattern(savedInstanceState.getString(AlarmUtils.ARG_PATTERN));
+        } else if (getArguments() != null) {
+            mCalendar = Calendar.getInstance();
+            mCalendar.setTimeInMillis(getArguments().getLong(AlarmUtils.ARG_CALENDAR));
+            mPattern = AlarmUtils.formatStringToPattern(getArguments().getString(AlarmUtils.ARG_PATTERN));
+        }
     }
 
     @Override
@@ -69,18 +91,32 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
         View view = inflater.inflate(R.layout.fragment_week, container, false);
         ButterKnife.bind(this, view);
 
+        checkboxMonday.setChecked(mPattern[0]);
         checkboxMonday.setOnCheckedChangeListener(this);
+        checkboxTuesday.setChecked(mPattern[1]);
         checkboxTuesday.setOnCheckedChangeListener(this);
+        checkboxWednesday.setChecked(mPattern[2]);
         checkboxWednesday.setOnCheckedChangeListener(this);
+        checkboxThursday.setChecked(mPattern[3]);
         checkboxThursday.setOnCheckedChangeListener(this);
+        checkboxFriday.setChecked(mPattern[4]);
         checkboxFriday.setOnCheckedChangeListener(this);
+        checkboxSaturday.setChecked(mPattern[5]);
         checkboxSaturday.setOnCheckedChangeListener(this);
+        checkboxSunday.setChecked(mPattern[6]);
         checkboxSunday.setOnCheckedChangeListener(this);
 
-        tvTime.setText(AlarmUtils.formatTime(Calendar.getInstance()));
+        tvTime.setText(AlarmUtils.formatTime(mCalendar));
         tvTime.setOnClickListener(this);
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putLong(AlarmUtils.ARG_CALENDAR, mCalendar.getTimeInMillis());
+        outState.putString(AlarmUtils.ARG_PATTERN, AlarmUtils.formatPatternToString(mPattern));
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -121,12 +157,19 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         tvTime.setText(AlarmUtils.formatTime(hourOfDay, minute));
-        if(timeChangeListener != null) {
-            timeChangeListener.onTimeChanged(hourOfDay, minute);
+
+        mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        mCalendar.set(Calendar.MINUTE, minute);
+        if(mDateChangeListener != null) {
+            mDateChangeListener.onDateChanged(mCalendar);
         }
     }
 
-    public void setTimeChangeListener(TimeChangeListener timeChangeListener) {
-        this.timeChangeListener = timeChangeListener;
+    /**
+     * Setting {@link DateChangeListener}
+     * @param dateChangeListener - {@link DateChangeListener}
+     */
+    public void setDateChangeListener(DateChangeListener dateChangeListener) {
+        this.mDateChangeListener = dateChangeListener;
     }
 }
