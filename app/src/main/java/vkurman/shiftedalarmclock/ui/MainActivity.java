@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.View;
 
 import java.util.List;
@@ -47,8 +46,6 @@ import vkurman.shiftedalarmclock.models.Alarm;
  * Version 1.0
  */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, ResultListener {
-
-    private static final String TAG = MainActivity.class.getSimpleName();
 
     // Binding views
     @BindView(R.id.recyclerview_alarms) RecyclerView recyclerView;
@@ -108,20 +105,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         viewModel.getAlarms().observe(this, new Observer<List<Alarm>>() {
             @Override
             public void onChanged(@Nullable List<Alarm> alarms) {
-                Log.e(TAG, "Updating alarms from LiveData in ViewModel");
-                for (Alarm alarm: alarms) {
-                    Log.d(TAG, "Alarm id: " + alarm.getId()
-                            + "\nName: " + alarm.getName()
-                            + "\nActive: " + alarm.isActive()
-                            + "\nRepeat: " + alarm.isRepeat()
-                            + "\nTone: " + alarm.getTone()
-                            + "\nVolume: " + alarm.getVolume()
-                            + "\nGradually Increase Volume: " + alarm.isGraduallyIncreaseVolume()
-                            + "\nSay time: " + alarm.isSayTime()
-                            + "\nPattern: " + alarm.getPattern().getStartDate() + " " + alarm.getPattern().getPattern().toString()
-                            + "\nSnooze: " + alarm.getSnooze().isSnoozeEnabled() + " interval=" + alarm.getSnooze().getSnoozeInterval() + " repeat=" + alarm.getSnooze().getSnoozeRepeat()
-                            + "\nVibration: " + alarm.getVibration().isVibrationEnabled());
-                }
                 alarmsAdapter.updateData(alarms);
             }
         });
