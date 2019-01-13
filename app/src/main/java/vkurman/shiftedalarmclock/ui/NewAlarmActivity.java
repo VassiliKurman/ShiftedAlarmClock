@@ -49,6 +49,7 @@ import vkurman.shiftedalarmclock.models.Pattern;
 import vkurman.shiftedalarmclock.models.Snooze;
 import vkurman.shiftedalarmclock.models.Type;
 import vkurman.shiftedalarmclock.models.Vibration;
+import vkurman.shiftedalarmclock.utils.AlarmUtils;
 
 /**
  * NewAlarmActivity is activity to create new Alarm.
@@ -208,33 +209,28 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
 
         if(alarm.getPattern() == null || alarm.getPattern().getPattern().length == 1) {
             SingleFragment singleFragment = new SingleFragment();
+            // Setting date in fragment same as alarm
+            Bundle bundle = new Bundle();
+            bundle.putLong(AlarmUtils.ARG_CALENDAR, alarm.getPattern().getStartDate().getTime());
+            singleFragment.setArguments(bundle);
+            // Attaching Fragment to this Activity
             fragmentManager.beginTransaction()
                     .add(R.id.container_for_fragment, singleFragment)
                     .commit();
-            // Setting date in fragment same as alarm
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(alarm.getPattern().getStartDate());
-            // TODO update text fields
-//            singleFragment.tvDate.setText(AlarmUtils.formatDate(cal));
-//            singleFragment.tvTime.setText(AlarmUtils.formatTime(cal));
-
+            // Setting Date and Time change listener
             singleFragment.setTimeChangeListener(this);
             singleFragment.setDateChangeListener(this);
         } else if(alarm.getPattern().getPattern().length == 7) {
-            Pattern pattern = alarm.getPattern();
             WeekFragment weekFragment = new WeekFragment();
-            // Adding fragment to activity
+            // Setting date in fragment same as alarm
+            Bundle bundle = new Bundle();
+            bundle.putLong(AlarmUtils.ARG_CALENDAR, alarm.getPattern().getStartDate().getTime());
+            bundle.putString(AlarmUtils.ARG_PATTERN, AlarmUtils.formatPatternToString(alarm.getPattern()));
+            weekFragment.setArguments(bundle);
+            // Attaching Fragment to this Activity
             fragmentManager.beginTransaction()
                     .add(R.id.container_for_fragment, weekFragment)
                     .commit();
-            // Setting checkboxes
-//            fragment.checkboxMonday.setChecked(pat.getPatternValue(0));
-//            fragment.checkboxTuesday.setChecked(pat.getPatternValue(1));
-//            fragment.checkboxWednesday.setChecked(pat.getPatternValue(2));
-//            fragment.checkboxThursday.setChecked(pat.getPatternValue(3));
-//            fragment.checkboxFriday.setChecked(pat.getPatternValue(4));
-//            fragment.checkboxSaturday.setChecked(pat.getPatternValue(5));
-//            fragment.checkboxSunday.setChecked(pat.getPatternValue(6));
 
             weekFragment.setTimeChangeListener(this);
         } else {

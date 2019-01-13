@@ -30,6 +30,15 @@ import vkurman.shiftedalarmclock.models.Pattern;
 public class AlarmUtils {
 
     /**
+     * Bundle argument name for Calendar
+     */
+    public static final String ARG_CALENDAR = "Calendar";
+    /**
+     * Bundle argument name for Pattern
+     */
+    public static final String ARG_PATTERN = "Pattern";
+
+    /**
      * Return String representation of alarm time in format "HH:MM".
      *
      * @param cal - Calendar
@@ -84,7 +93,7 @@ public class AlarmUtils {
     }
 
     /**
-     * Return String representation of alarm pattern.
+     * Return String representation of alarm pattern to display in UI.
      *
      * @param pattern - Pattern
      * @return String
@@ -98,5 +107,40 @@ public class AlarmUtils {
             sb.append(on ? "[*]" : "[ ]");
         }
         return sb.toString();
+    }
+
+    /**
+     * Return String representation of alarm pattern to pass between activities.
+     *
+     * @param pattern - Pattern
+     * @return String
+     */
+    public static String formatPatternToString(Pattern pattern) {
+        if(pattern == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(boolean on: pattern.getPattern()) {
+            sb.append(on ? "1 " : "0 ");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Return boolean[] representation of alarm pattern passed between activities.
+     *
+     * @param pattern - Pattern
+     * @return String
+     */
+    public static boolean[] formatStringToPattern(String pattern) {
+        if(pattern == null) {
+            return null;
+        }
+        String[] pat = pattern.split(" ");
+        boolean[] bool = new boolean[pat.length];
+        for(int i = 0; i < pat.length; i++) {
+            bool[i] = pat[i].equals("1");
+        }
+        return bool;
     }
 }

@@ -41,7 +41,6 @@ import vkurman.shiftedalarmclock.utils.AlarmUtils;
 public class SingleFragment extends Fragment implements View.OnClickListener,
         TimePickerDialog.OnTimeSetListener, DatePickerDialog.OnDateSetListener {
 
-    private static final String ARG_CALENDAR = "Calendar";
     /**
      * Alarm set date.
      */
@@ -57,15 +56,18 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
 
     public SingleFragment() {
         // Required empty public constructor
-        mCalendar = Calendar.getInstance();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+
+        if (savedInstanceState != null) {
             mCalendar = Calendar.getInstance();
-            mCalendar.setTimeInMillis(getArguments().getLong(ARG_CALENDAR));
+            mCalendar.setTimeInMillis(savedInstanceState.getLong(AlarmUtils.ARG_CALENDAR));
+        } else if (getArguments() != null) {
+            mCalendar = Calendar.getInstance();
+            mCalendar.setTimeInMillis(getArguments().getLong(AlarmUtils.ARG_CALENDAR));
         }
     }
 
@@ -86,6 +88,12 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putLong(AlarmUtils.ARG_CALENDAR, mCalendar.getTimeInMillis());
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void onClick(View view) {
         if(view == tvDate) {
             DatePickerFragment datePickerFragment = new DatePickerFragment();
@@ -100,6 +108,8 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+        mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        mCalendar.set(Calendar.MINUTE, minute);
         tvTime.setText(AlarmUtils.formatTime(hourOfDay, minute));
         if(timeChangeListener != null) {
             timeChangeListener.onTimeChanged(hourOfDay, minute);
@@ -108,6 +118,9 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onDateSet(DatePicker view, int year, int month, int day) {
+        mCalendar.set(Calendar.YEAR, year);
+        mCalendar.set(Calendar.MONTH, month);
+        mCalendar.set(Calendar.DAY_OF_MONTH, day);
         tvDate.setText(AlarmUtils.formatDate(year, month, day));
         if(dateChangeListener != null) {
             dateChangeListener.onDateChanged(year, month, day);
