@@ -37,6 +37,14 @@ public class AlarmUtils {
      * Bundle argument name for Pattern
      */
     public static final String ARG_PATTERN = "Pattern";
+    /**
+     * Action add fragment
+     */
+    public static final int ACTION_ADD_FRAGMENT = 1;
+    /**
+     * Action add fragment
+     */
+    public static final int ACTION_REPLACE_FRAGMENT = 2;
 
     /**
      * Return String representation of alarm time in format "HH:MM".

@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +55,10 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
      * Date change listener
      */
     private DateChangeListener mDateChangeListener;
+    /**
+     * Pattern change listener
+     */
+    private PatternChangeListener mPatternChangeListener;
 
     @BindView(R.id.checkbox_monday) CheckBox checkboxMonday;
     @BindView(R.id.checkbox_tuesday) CheckBox checkboxTuesday;
@@ -80,6 +85,8 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
         } else if (getArguments() != null) {
             mCalendar = Calendar.getInstance();
             mCalendar.setTimeInMillis(getArguments().getLong(AlarmUtils.ARG_CALENDAR));
+            mCalendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            Log.e("WeekFragment", mCalendar.toString());
             mPattern = AlarmUtils.formatStringToPattern(getArguments().getString(AlarmUtils.ARG_PATTERN));
         }
     }
@@ -131,27 +138,36 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if(buttonView == checkboxMonday) {
+            mPattern[0] = isChecked;
             Snackbar.make(checkboxMonday, "Monday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
                     .setAction("Monday", null).show();
         } else if(buttonView == checkboxTuesday) {
+            mPattern[1] = isChecked;
             Snackbar.make(checkboxTuesday, "Tuesday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
                     .setAction("Tuesday", null).show();
         } else if(buttonView == checkboxWednesday) {
+            mPattern[2] = isChecked;
             Snackbar.make(checkboxWednesday, "Wednesday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
                     .setAction("Wednesday", null).show();
         } else if(buttonView == checkboxThursday) {
+            mPattern[3] = isChecked;
             Snackbar.make(checkboxThursday, "Thursday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
                     .setAction("Thursday", null).show();
         } else if(buttonView == checkboxFriday) {
+            mPattern[4] = isChecked;
             Snackbar.make(checkboxFriday, "Friday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
                     .setAction("Friday", null).show();
         } else if(buttonView == checkboxSaturday) {
+            mPattern[5] = isChecked;
             Snackbar.make(checkboxSaturday, "Saturday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
                     .setAction("Saturday", null).show();
         } else if(buttonView == checkboxSunday) {
+            mPattern[6] = isChecked;
             Snackbar.make(checkboxSunday, "Sunday checked " + (isChecked ? "ON" : "OFF"), Snackbar.LENGTH_SHORT)
                     .setAction("Sunday", null).show();
         }
+        // Trigger pattern change listener to update
+        onPatternChanged();
     }
 
     @Override
@@ -165,11 +181,25 @@ public class WeekFragment extends Fragment implements View.OnClickListener,
         }
     }
 
+    private void onPatternChanged() {
+        if (mPatternChangeListener != null) {
+            mPatternChangeListener.onPatternChanged(mPattern);
+        }
+    }
+
     /**
      * Setting {@link DateChangeListener}
      * @param dateChangeListener - {@link DateChangeListener}
      */
     public void setDateChangeListener(DateChangeListener dateChangeListener) {
         this.mDateChangeListener = dateChangeListener;
+    }
+
+    /**
+     * Setting {@link PatternChangeListener}
+     * @param patternChangeListener - {@link PatternChangeListener}
+     */
+    public void setPatternChangeListener(PatternChangeListener patternChangeListener) {
+        this.mPatternChangeListener = patternChangeListener;
     }
 }

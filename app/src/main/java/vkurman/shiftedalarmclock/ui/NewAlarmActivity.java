@@ -19,6 +19,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.media.RingtoneManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
@@ -59,7 +60,7 @@ import vkurman.shiftedalarmclock.utils.AlarmUtils;
  */
 public class NewAlarmActivity extends AppCompatActivity implements View.OnClickListener,
         CompoundButton.OnCheckedChangeListener, NameDialogFragment.NameDialogListener,
-        DateChangeListener {
+        DateChangeListener, PatternChangeListener {
 
     public static final String EXTRA_ALARM_ID = "alarmId";
     public static final String EXTRA_ALARM_NEW = "new";
@@ -123,7 +124,7 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
                     mNew = true;
                 }
             }
-            populateUI(mAlarm);
+            populateUI();
         }
     }
 
@@ -192,69 +193,43 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
                 viewModel.getAlarm().removeObserver(this);
                 Log.d(TAG, "Receiving database update from LiveData");
                 mAlarm = alarm;
-                populateUI(mAlarm);
+                populateUI();
             }
         });
     }
 
     /**
      * Setting UI.
-     *
-     * @param alarm - Alarm
      */
-    private void populateUI(final Alarm alarm) {
-        if(alarm == null) {
+    private void populateUI() {
+        if(mAlarm == null) {
             return;
         }
+        // Displaying fragment for pattern
+        actionOnFragment(mAlarm.getPattern().getPattern().length, AlarmUtils.ACTION_ADD_FRAGMENT);
 
-        if(alarm.getPattern() == null || alarm.getPattern().getPattern().length == 1) {
-            SingleFragment singleFragment = new SingleFragment();
-            // Setting date in fragment same as alarm
-            Bundle bundle = new Bundle();
-            bundle.putLong(AlarmUtils.ARG_CALENDAR, alarm.getPattern().getStartDate().getTime());
-            singleFragment.setArguments(bundle);
-            // Attaching Fragment to this Activity
-            fragmentManager.beginTransaction()
-                    .add(R.id.container_for_fragment, singleFragment)
-                    .commit();
-            // Setting Date change listener
-            singleFragment.setDateChangeListener(this);
-        } else if(alarm.getPattern().getPattern().length == 7) {
-            WeekFragment weekFragment = new WeekFragment();
-            // Setting date in fragment same as alarm
-            Bundle bundle = new Bundle();
-            bundle.putLong(AlarmUtils.ARG_CALENDAR, alarm.getPattern().getStartDate().getTime());
-            bundle.putString(AlarmUtils.ARG_PATTERN, AlarmUtils.formatPatternToString(alarm.getPattern()));
-            weekFragment.setArguments(bundle);
-            // Attaching Fragment to this Activity
-            fragmentManager.beginTransaction()
-                    .add(R.id.container_for_fragment, weekFragment)
-                    .commit();
-
-            weekFragment.setDateChangeListener(this);
-        } else {
-            // TODO add custom fragment
-        }
-
-        tvAlarmName.setText(alarm.getName());
+        tvAlarmName.setText(mAlarm.getName());
 
         pickerAlarmType.setMinValue(0);
         pickerAlarmType.setMaxValue(2);
         pickerAlarmType.setDisplayedValues(Type.asStringArray());
+        pickerAlarmType.setValue(
+                mAlarm.getPattern().getPattern().length == 1 ? 0
+                        : mAlarm.getPattern().getPattern().length == 7 ? 1 : 2);
         // Setting alarm tone
-        if(alarm.getTone() != null) {
-            tvToneName.setText(alarm.getTone());
+        if(mAlarm.getTone() != null) {
+            tvToneName.setText(mAlarm.getTone());
         }
         // TODO set volume
         // TODO set switch for graduate volume increase
         // Setting vibration
-        if(alarm.getVibration() != null) {
-            tvVibrationName.setText(alarm.getVibration().getVibrationName());
-            switchVibrate.setChecked(alarm.getVibration().isVibrationEnabled());
+        if(mAlarm.getVibration() != null) {
+            tvVibrationName.setText(mAlarm.getVibration().getVibrationName());
+            switchVibrate.setChecked(mAlarm.getVibration().isVibrationEnabled());
         } else {
             switchVibrate.setChecked(false);
         }
-        switchSayTime.setChecked(alarm.isSayTime());
+        switchSayTime.setChecked(mAlarm.isSayTime());
 
         // Setting listeners
         tvAlarmName.setOnClickListener(new View.OnClickListener() {
@@ -271,16 +246,13 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
                         .setAction("Action", null).show();
                 switch (newVal) {
                     case 0:
-                        fragmentManager.beginTransaction()
-                                .replace(R.id.container_for_fragment, new SingleFragment())
-                                .commit();
+                        actionOnFragment(1, AlarmUtils.ACTION_REPLACE_FRAGMENT);
                         break;
                     case 1:
-                        fragmentManager.beginTransaction()
-                                .replace(R.id.container_for_fragment, new WeekFragment())
-                                .commit();
+                        actionOnFragment(7, AlarmUtils.ACTION_REPLACE_FRAGMENT);
                         break;
                     case 2:
+                        // TODO add action for custom pattern fragment
                         break;
                 }
             }
@@ -292,6 +264,68 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
         switchTone.setOnCheckedChangeListener(this);
         switchVibrate.setOnCheckedChangeListener(this);
         switchSayTime.setOnCheckedChangeListener(this);
+    }
+
+    /**
+     * This method is used to either add or replace pattern fragment in this activity.
+     *
+     * @param patternLength - int
+     * @param action - int (one of the {@link AlarmUtils} action values)
+     */
+    private void actionOnFragment(int patternLength, int action) {
+        Bundle bundle = new Bundle();
+        bundle.putLong(AlarmUtils.ARG_CALENDAR, mAlarm.getPattern().getStartDate().getTime());
+
+        switch (patternLength) {
+
+            case 1:
+                SingleFragment singleFragment = new SingleFragment();
+                if(mAlarm.getPattern().getPattern().length != 1) {
+                    mAlarm.getPattern().setPattern(new boolean[]{true});
+                }
+                bundle.putString(AlarmUtils.ARG_PATTERN, AlarmUtils.formatPatternToString(mAlarm.getPattern()));
+                singleFragment.setArguments(bundle);
+                // Attaching Fragment to this Activity
+                if(action == AlarmUtils.ACTION_ADD_FRAGMENT) {
+                    fragmentManager.beginTransaction()
+                        .add(R.id.container_for_fragment, singleFragment)
+                        .commit();
+                } else if(action == AlarmUtils.ACTION_REPLACE_FRAGMENT) {
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.container_for_fragment, singleFragment)
+                            .commit();
+                }
+                // Setting DateChangeListener
+                singleFragment.setDateChangeListener(this);
+                break;
+            case 7:
+                WeekFragment weekFragment = new WeekFragment();
+                if(mAlarm.getPattern().getPattern().length != 7) {
+                    mAlarm.getPattern().setPattern(new boolean[7]);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(mAlarm.getPattern().getStartDate());
+                    int day = cal.get(Calendar.DAY_OF_WEEK);
+                    mAlarm.getPattern().setPatternValue(day == 1 ? 6 : day - 2,true);
+                }
+                bundle.putString(AlarmUtils.ARG_PATTERN, AlarmUtils.formatPatternToString(mAlarm.getPattern()));
+                weekFragment.setArguments(bundle);
+                // Attaching Fragment to this Activity
+                if(action == AlarmUtils.ACTION_ADD_FRAGMENT) {
+                    fragmentManager.beginTransaction()
+                            .add(R.id.container_for_fragment, weekFragment)
+                            .commit();
+                } else if(action == AlarmUtils.ACTION_REPLACE_FRAGMENT) {
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.container_for_fragment, weekFragment)
+                            .commit();
+                }
+                // Setting DateChangeListener and PatternChangeListener
+                weekFragment.setDateChangeListener(this);
+                weekFragment.setPatternChangeListener(this);
+                break;
+             default:
+                 // TODO add custom fragment
+        }
     }
 
     /**
@@ -338,10 +372,18 @@ public class NewAlarmActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onDateChanged(Calendar calendar) {
-        if(mAlarm == null || calendar == null) {
+    public void onDateChanged(@NonNull Calendar calendar) {
+        if(mAlarm == null) {
             return;
         }
         mAlarm.getPattern().setStartDate(calendar.getTime());
+    }
+
+    @Override
+    public void onPatternChanged(@NonNull boolean[] pattern) {
+        if(mAlarm == null) {
+            return;
+        }
+        mAlarm.getPattern().setPattern(pattern);
     }
 }

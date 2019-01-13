@@ -19,6 +19,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -109,10 +110,18 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        tvTime.setText(AlarmUtils.formatTime(hourOfDay, minute));
+        Calendar tempCal = (Calendar) mCalendar.clone();
+        tempCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        tempCal.set(Calendar.MINUTE, minute);
 
-        mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-        mCalendar.set(Calendar.MINUTE, minute);
+        if (tempCal.after(Calendar.getInstance())) {
+            Snackbar.make(tvDate, "Time set before current time!", Snackbar.LENGTH_SHORT)
+                    .setAction("Date", null).show();
+            return;
+        }
+
+        mCalendar = tempCal;
+        tvTime.setText(AlarmUtils.formatTime(hourOfDay, minute));
         if(mDateChangeListener != null) {
             mDateChangeListener.onDateChanged(mCalendar);
         }
@@ -120,9 +129,18 @@ public class SingleFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onDateSet(DatePicker view, int year, int month, int day) {
-        mCalendar.set(Calendar.YEAR, year);
-        mCalendar.set(Calendar.MONTH, month);
-        mCalendar.set(Calendar.DAY_OF_MONTH, day);
+        Calendar tempCal = (Calendar) mCalendar.clone();
+        tempCal.set(Calendar.YEAR, year);
+        tempCal.set(Calendar.MONTH, month);
+        tempCal.set(Calendar.DAY_OF_MONTH, day);
+
+        if (tempCal.before(Calendar.getInstance())) {
+            Snackbar.make(tvDate, "Date set before current date!", Snackbar.LENGTH_SHORT)
+                    .setAction("Date", null).show();
+            return;
+        }
+
+        mCalendar = tempCal;
         tvDate.setText(AlarmUtils.formatDate(year, month, day));
         if(mDateChangeListener != null) {
             mDateChangeListener.onDateChanged(mCalendar);
