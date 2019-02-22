@@ -21,18 +21,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
-import android.widget.FrameLayout;
-import android.widget.GridLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
+
+import com.google.android.flexbox.FlexboxLayout;
 
 import java.util.Calendar;
 import java.util.Objects;
@@ -51,7 +49,6 @@ import vkurman.shiftedalarmclock.utils.AlarmUtils;
  * Version 1.0
  */
 public class PatternFragment extends Fragment implements View.OnClickListener,
-        CompoundButton.OnCheckedChangeListener,
         TimePickerDialog.OnTimeSetListener, DatePickerDialog.OnDateSetListener {
 
     /**
@@ -72,7 +69,7 @@ public class PatternFragment extends Fragment implements View.OnClickListener,
     private PatternChangeListener mPatternChangeListener;
 
     @BindView(R.id.pattern_container)
-    FrameLayout tvContainer;
+    FlexboxLayout tvContainer;
     @BindView(R.id.tv_pattern_date)
     TextView tvDate;
     @BindView(R.id.tv_pattern_time)
@@ -109,17 +106,20 @@ public class PatternFragment extends Fragment implements View.OnClickListener,
         tvDate.setOnClickListener(this);
         tvTime.setOnClickListener(this);
 
-//        GridLayout gridLayout = new GridLayout(getActivity());
-//        gridLayout.setColumnCount(mPattern.length > 7 ? 7 : mPattern.length);
-//        gridLayout.setRowCount(mPattern.length > 7 ? (int) Math.ceil(mPattern.length / 7) : 1);
-        LinearLayout layout = new LinearLayout(getContext());
-        for(boolean pattern: mPattern) {
-            CheckBox checkbox = new CheckBox(getActivity());
-            checkbox.setChecked(pattern);
-            checkbox.setOnCheckedChangeListener(this);
-            layout.addView(checkbox);
+        for(int i = 0; i < mPattern.length; i++) {
+            final CheckBox checkbox = new CheckBox(getActivity());
+            final int index = i;
+            checkbox.setChecked(mPattern[i]);
+            checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    mPattern[index] = isChecked;
+                    // Trigger pattern change listener to update
+                    onPatternChanged();
+                }
+            });
+            tvContainer.addView(checkbox);
         }
-        tvContainer.addView(layout);
 
         return view;
     }
@@ -135,13 +135,6 @@ public class PatternFragment extends Fragment implements View.OnClickListener,
             timePickerFragment.timeSetListener = this;
             timePickerFragment.show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "timePicker");
         }
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-        // Trigger pattern change listener to update
-        onPatternChanged();
     }
 
     @Override

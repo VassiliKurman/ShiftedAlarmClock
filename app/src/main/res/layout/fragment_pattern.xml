@@ -47,10 +47,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/tv_pattern_date" />
 
-    <FrameLayout
+    <com.google.android.flexbox.FlexboxLayout
         android:id="@+id/pattern_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:flexDirection="row"
+        app:flexWrap="wrap"
         app:layout_constraintTop_toBottomOf="@id/tv_pattern_start_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

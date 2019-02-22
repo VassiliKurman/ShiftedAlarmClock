@@ -15,8 +15,10 @@
  */
 package vkurman.shiftedalarmclock.aac;
 
+import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModel;
+import android.support.annotation.NonNull;
 
 import vkurman.shiftedalarmclock.models.Alarm;
 
@@ -25,12 +27,13 @@ import vkurman.shiftedalarmclock.models.Alarm;
  * Created by Vassili Kurman on 24/11/2018.
  * Version 1.0
  */
-public class AlarmViewModel extends ViewModel {
+public class AlarmViewModel extends AndroidViewModel {
 
     private LiveData<Alarm> alarm;
 
-    AlarmViewModel(AlarmDatabase database, long alarmId) {
-        alarm = database.alarmDao().load(alarmId);
+    AlarmViewModel(@NonNull Application application, long alarmId) {
+        super(application);
+        alarm = AlarmDatabase.getInstance(getApplication()).alarmDao().load(alarmId);
     }
 
     public LiveData<Alarm> getAlarm() {

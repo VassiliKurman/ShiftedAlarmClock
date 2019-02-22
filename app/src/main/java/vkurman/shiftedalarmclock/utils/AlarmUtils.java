@@ -127,7 +127,7 @@ public class AlarmUtils {
         }
         StringBuilder sb = new StringBuilder();
         for(boolean on: pattern.getPattern()) {
-            sb.append(on ? "[*]" : "[ ]");
+            sb.append(on ? "[+] " : "[-] ");
         }
         return sb.toString();
     }
